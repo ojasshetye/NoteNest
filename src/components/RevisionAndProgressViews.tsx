@@ -467,6 +467,7 @@ interface RevisionViewProps {
   initialTopicId?: string | null;
   onUserUpdated: (user: UserProfile) => void;
   onNavigate: (section: NavSection) => void;
+  onOpenAddMaterial?: () => void;
 }
 
 export const RevisionView: React.FC<RevisionViewProps> = ({
@@ -813,6 +814,7 @@ export const RevisionView: React.FC<RevisionViewProps> = ({
 interface ProgressViewProps {
   user: UserProfile;
   onNavigate: (section: NavSection) => void;
+  onOpenAddMaterial?: () => void;
 }
 
 export const ProgressView: React.FC<ProgressViewProps> = ({ user, onNavigate }) => {

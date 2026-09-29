@@ -22,19 +22,24 @@ export interface StudyMaterial {
   fileName: string;
   fileSize?: string;
   subject: string;
-  subjectCode: string;
-  fileType: 'PDF' | 'PPTX' | 'Notes' | 'Markdown Doc';
+  subjectCode?: string;
+  unit?: string;
+  type?: string;
+  uploadedAt?: string;
+  masteryPct?: number;
+  summarySnippet?: string;
+  fileType?: 'PDF' | 'PPTX' | 'Notes' | 'Markdown Doc';
   pagesOrSlides: string;
-  pageCount: number;
-  conceptsCount: number;
-  updatedAt: string;
-  authorNote: string;
+  pageCount?: number;
+  conceptsCount?: number;
+  updatedAt?: string;
+  authorNote?: string;
   recallProgress: number;
   statusBadge?: 'Mastered' | 'Needs Review' | 'Primary' | null;
   keyConcepts: string[];
-  actionLabel: string;
-  actionType: 'quiz' | 'review' | 'practice' | 'drill';
-  questionCount: number;
+  actionLabel?: string;
+  actionType?: 'quiz' | 'review' | 'practice' | 'drill';
+  questionCount?: number;
   activeInAiScope: boolean;
   excerptPage: number;
   excerptSection: string;
@@ -121,6 +126,7 @@ export interface QuizQuestion {
   id: number;
   topicTag: string;
   typeLabel: string;
+  difficulty?: string;
   prompt: string;
   options: {
     letter: 'A' | 'B' | 'C' | 'D';
@@ -129,6 +135,7 @@ export interface QuizQuestion {
   correctLetter: 'A' | 'B' | 'C' | 'D';
   explanation: string;
   sourceRef: string;
+  sourceCitation?: string;
   sourceExcerpt: string;
 }
 

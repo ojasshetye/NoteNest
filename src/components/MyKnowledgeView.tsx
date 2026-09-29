@@ -431,7 +431,7 @@ export const MyKnowledgeView: React.FC<MyKnowledgeViewProps> = ({
               </div>
               <button
                 type="button"
-                onClick={onOpenAddMaterial}
+                onClick={() => onOpenAddMaterial()}
                 className="px-5 py-2.5 rounded-xl bg-[#2563EB] text-white text-xs font-semibold inline-flex items-center gap-2 font-display cursor-pointer"
               >
                 <Plus className="w-4 h-4" />

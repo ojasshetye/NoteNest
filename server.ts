@@ -1,5 +1,4 @@
 import express, { Request, Response, NextFunction } from 'express';
-import { createServer as createViteServer } from 'vite';
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
@@ -7,6 +6,10 @@ import zlib from 'zlib';
 import { createRequire } from 'module';
 import dotenv from 'dotenv';
 import { GoogleGenAI, Type } from '@google/genai';
+
+if (process.argv.includes('--prod')) {
+  process.env.NODE_ENV = 'production';
+}
 
 const requireModule = createRequire(import.meta.url);
 let pdfParseLib: ((buf: Buffer) => Promise<{ text?: string; numpages?: number }>) | null = null;
@@ -31,9 +34,11 @@ const RUNTIME_ENV_KEY = process.env.GEMINI_API_KEY || process.env.API_KEY;
 dotenv.config({ override: true });
 const DOTENV_KEY = process.env.GEMINI_API_KEY || process.env.API_KEY;
 
-const PORT = 3000;
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+const PORT = Number(process.env.PORT) || 3000;
+const HOST = process.env.HOST || '0.0.0.0';
 const SECRET_KEY = process.env.AUTH_SECRET || 'notenest-academic-clarity-secret-key-2026-hmac';
-const DB_DIR = path.resolve(process.cwd(), 'data');
+const DB_DIR = path.resolve(process.cwd(), process.env.DATA_DIR || 'data');
 const DB_FILE = path.join(DB_DIR, 'notenest-db.json');
 
 // Return all candidate Gemini AI clients (runtime injected + .env configured)
@@ -41,7 +46,13 @@ function getAiClients(): GoogleGenAI[] {
   const keys = Array.from(
     new Set(
       [RUNTIME_ENV_KEY, DOTENV_KEY, process.env.GEMINI_API_KEY, process.env.API_KEY].filter(
-        (k): k is string => Boolean(k && k.trim() && k !== 'MY_GEMINI_API_KEY')
+        (k): k is string =>
+          Boolean(
+            k &&
+              k.trim() &&
+              k.trim() !== 'MY_GEMINI_API_KEY' &&
+              k.trim() !== 'YOUR_GEMINI_API_KEY'
+          )
       )
     )
   );
@@ -56,6 +67,22 @@ function getAiClients(): GoogleGenAI[] {
         },
       })
   );
+}
+
+function logEnvironmentStatus(): void {
+  const hasGeminiKey = getAiClients().length > 0;
+  if (!hasGeminiKey) {
+    console.warn(
+      '[NoteNest Config Notice] GEMINI_API_KEY is not set or uses a placeholder value. ' +
+        'Live Gemini AI generation is disabled; NoteNest will safely use its built-in local document parser and synthesis fallback until GEMINI_API_KEY is configured.'
+    );
+  }
+  if (IS_PRODUCTION && !process.env.AUTH_SECRET) {
+    console.warn(
+      '[NoteNest Config Notice] AUTH_SECRET is not set in environment variables. ' +
+        'Using default HMAC signing secret. Set AUTH_SECRET in your Render Environment Variables for production security.'
+    );
+  }
 }
 
 function getAiClient(): GoogleGenAI | null {
@@ -1172,8 +1199,19 @@ function validatePasswordStrength(password: string): { valid: boolean; errors: s
 }
 
 async function startServer() {
+  logEnvironmentStatus();
+
   const app = express();
   app.use(express.json({ limit: '30mb' }));
+
+  // Health & environment status endpoint for Render health checks
+  app.get('/api/health', (_req: Request, res: Response) => {
+    res.json({
+      status: 'ok',
+      environment: IS_PRODUCTION ? 'production' : 'development',
+      geminiConfigured: getAiClients().length > 0,
+    });
+  });
 
   // Ensure DB is initialized
   loadDatabase();
@@ -3755,23 +3793,48 @@ ${contextDocs}`,
     });
   });
 
+  // Return clean JSON 404 for any unmatched /api/* routes before SPA fallback
+  app.all('/api/*', (req: Request, res: Response) => {
+    res.status(404).json({
+      error: `API endpoint not found: ${req.method} ${req.originalUrl}`,
+    });
+  });
+
   // Vite middleware in dev mode or static serving in production
-  if (process.env.NODE_ENV !== 'production') {
+  const distPath = path.resolve(process.cwd(), 'dist');
+  const distIndexHtml = path.join(distPath, 'index.html');
+
+  if (!IS_PRODUCTION) {
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.join(process.cwd(), 'dist');
+    if (!fs.existsSync(distIndexHtml)) {
+      console.warn(
+        `[NoteNest Build Warning] Production build not found at ${distIndexHtml}. Run "npm run build" before "npm start".`
+      );
+    }
     app.use(express.static(distPath));
     app.get('*', (_req: Request, res: Response) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+      if (fs.existsSync(distIndexHtml)) {
+        res.sendFile(distIndexHtml);
+      } else {
+        res
+          .status(503)
+          .send(
+            'NoteNest frontend build not found. Please ensure the build command "npm install && npm run build" completed successfully.'
+          );
+      }
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`NoteNest full-stack server running on http://localhost:${PORT}`);
+  app.listen(PORT, HOST, () => {
+    console.log(
+      `NoteNest full-stack server running on http://${HOST}:${PORT} (${IS_PRODUCTION ? 'production' : 'development'} mode)`
+    );
   });
 }
 
