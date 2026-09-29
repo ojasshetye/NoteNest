@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <defs>
+    <linearGradient id="nn-mint-grad" x1="34" y1="38" x2="64" y2="96" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#E6F4EC" />
+      <stop offset="45%" stop-color="#B5DEC9" />
+      <stop offset="100%" stop-color="#8CC6AF" />
+    </linearGradient>
+    <linearGradient id="nn-coral-grad" x1="45" y1="60" x2="78" y2="104" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F27856" />
+      <stop offset="100%" stop-color="#EA6342" />
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded Cream Tile Background matching NoteNest Logo.jpeg -->
+  <rect x="4" y="4" width="112" height="112" rx="22" fill="#FDF8EE" />
+
+  <!-- Right Sage Green Pillar of the N -->
+  <path
+    d="M74 12H92C99.732 12 106 18.268 106 26V94C106 101.732 99.732 108 92 108H84C87.5 104.5 89 99.5 89 93V68C89 58.5 84.5 50.5 74 39V12Z"
+    fill="#93CBB4"
+  />
+
+  <!-- Inner Left Mint Fold under Diagonal -->
+  <path
+    d="M35 38L61 65C66.5 70.8 65.5 79.5 59 86.5C51.5 94.5 40 102.5 31 107.5C33.8 103.5 35 98.5 35 92V38Z"
+    fill="url(#nn-mint-grad)"
+  />
+
+  <!-- Bottom Coral/Terracotta Nest Triangle -->
+  <path
+    d="M36 108C49 99 61.5 88.5 66.5 79.5C68.8 75.3 69.2 70.5 67.5 65.5L83.5 95C86.8 101 82.5 108 75.5 108H36Z"
+    fill="url(#nn-coral-grad)"
+  />
+
+  <!-- Deep Navy Left Pillar + Diagonal Arm of the N -->
+  <path
+    d="M14 26C14 18.268 20.268 12 28 12H45.5C48.5 12 51.3 13.4 53.2 15.7L80.5 49C84.8 54.2 84.1 61.9 78.9 66.2C73.7 70.5 66 69.8 61.7 64.6L38 36V96C38 102.627 32.627 108 26 108C19.373 108 14 102.627 14 96V26Z"
+    fill="#13293D"
+  />
+</svg>

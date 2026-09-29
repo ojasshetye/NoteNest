@@ -1,0 +1,680 @@
+{
+  "users": [
+    {
+      "id": "usr-alex-chen",
+      "name": "Alex Chen",
+      "email": "alex.chen@stanford.edu",
+      "passwordHash": "3e4abd8797bfcaac3f13fd530a838002775005207f7e712e8a9417f4991fc0da4d0b6efb25b478635574506be9561db3c428910254597d5ef21fa61c5915e81e",
+      "passwordSalt": "5b54be4f5aab37f6dbd7c44df2d332de",
+      "course": "Computer Science",
+      "year": "Yr 3",
+      "streakDays": 6,
+      "onboarded": true,
+      "subjects": [
+        "DBMS",
+        "Operating Systems",
+        "Computer Networks",
+        "Web Technology",
+        "Mathematics"
+      ],
+      "goals": [
+        "Understand concepts",
+        "Prepare for exams",
+        "Revise faster",
+        "Test my knowledge"
+      ],
+      "weeklyCompletedModules": 14,
+      "weeklyTargetModules": 20,
+      "createdAt": "2026-09-28T15:48:39.544Z",
+      "preferences": {
+        "theme": "light",
+        "emailNotifications": true,
+        "revisionReminders": true,
+        "strictGroundedMode": true
+      },
+      "materials": [
+        {
+          "id": "mat-dbms-3",
+          "title": "DBMS Unit 3 — Concurrency Control",
+          "fileName": "DBMS Unit 3 — Concurrency Control.pdf",
+          "subject": "DBMS",
+          "subjectCode": "DBMS",
+          "fileType": "PDF",
+          "pagesOrSlides": "PDF · 24 pages",
+          "pageCount": 48,
+          "conceptsCount": 12,
+          "updatedAt": "Updated Yesterday",
+          "authorNote": "Prof. V. Sharma Notes",
+          "recallProgress": 72,
+          "statusBadge": "Primary",
+          "keyConcepts": [
+            "Conflict Serializability",
+            "View Equivalence",
+            "Two-Phase Locking"
+          ],
+          "actionLabel": "Quiz (10 Qs)",
+          "actionType": "quiz",
+          "questionCount": 10,
+          "activeInAiScope": true,
+          "excerptPage": 14,
+          "excerptSection": "§ 3.2",
+          "excerptText": "\"...serializability can be categorized into Conflict Serializability and View Serializability. If every conflict pair in S respects the same temporal direction in S', then S is conflict equivalent to S'. Cycles in the precedence graph imply the existence of conflicting causal dependencies that cannot be resolved in any linear topological sort.\"",
+          "fullSummary": "Comprehensive lecture notes covering transaction schedules, ACID isolation guarantees, conflict serializability, precedence (serialization) graphs, View Equivalence, Strict Two-Phase Locking (2PL), and timestamp-based concurrency protocols."
+        },
+        {
+          "id": "mat-dbms-1",
+          "title": "DBMS Unit 1 — Relational Model & ER",
+          "fileName": "DBMS Unit 1 — Relational Model.pdf",
+          "subject": "DBMS",
+          "subjectCode": "DBMS",
+          "fileType": "PDF",
+          "pagesOrSlides": "PDF · 18 pages",
+          "pageCount": 18,
+          "conceptsCount": 16,
+          "updatedAt": "Updated 3 days ago",
+          "authorNote": "Syllabus Core",
+          "recallProgress": 88,
+          "statusBadge": "Mastered",
+          "keyConcepts": [
+            "Entity Sets & Attributes",
+            "Relational Algebra",
+            "Primary & Foreign Keys"
+          ],
+          "actionLabel": "Review (5 Qs)",
+          "actionType": "review",
+          "questionCount": 5,
+          "activeInAiScope": false,
+          "excerptPage": 7,
+          "excerptSection": "§ 1.4",
+          "excerptText": "\"Referential integrity constraints ensure that a value appearing in one relation for a given set of attributes also appears for a certain set of attributes in another relation. Foreign keys must either match a candidate key tuple in the referenced relation or be wholly NULL.\"",
+          "fullSummary": "Foundational study packet on Entity-Relationship diagrams, weak entity sets, participation constraints, Codd’s relational model rules, selection/projection/join operators in relational algebra, and tuple relational calculus."
+        },
+        {
+          "id": "mat-notes-acid",
+          "title": "Class Notes — Transactions & ACID",
+          "fileName": "Class Notes — Transactions.pdf",
+          "subject": "DBMS",
+          "subjectCode": "DBMS",
+          "fileType": "Notes",
+          "pagesOrSlides": "Notes · 8 pages",
+          "pageCount": 14,
+          "conceptsCount": 9,
+          "updatedAt": "Updated 4 days ago",
+          "authorNote": "Handwritten + OCR",
+          "recallProgress": 64,
+          "statusBadge": null,
+          "keyConcepts": [
+            "Atomicity & Consistency",
+            "Isolation Levels",
+            "Durability Logs"
+          ],
+          "actionLabel": "Practice (8 Qs)",
+          "actionType": "practice",
+          "questionCount": 8,
+          "activeInAiScope": true,
+          "excerptPage": 4,
+          "excerptSection": "Diagram 2",
+          "excerptText": "\"Hand-drawn precedence graph: T1 → T2 with directed edge on W(A)-R(A). Note: Write-Read (WR) conflict creates dirty read hazard if T1 aborts after T2 reads uncommitted item A.\"",
+          "fullSummary": "Digitized handwritten notebook pages detailing transaction state transitions (Active, Partially Committed, Failed, Aborted, Committed), SQL isolation anomalies (Dirty Read, Non-Repeatable Read, Phantom Read), and Write-Ahead Logging."
+        },
+        {
+          "id": "mat-os-4",
+          "title": "OS Unit 4 — Deadlocks & Prevention",
+          "fileName": "OS Unit 4 — Deadlocks.pdf",
+          "subject": "Operating Systems",
+          "subjectCode": "OS",
+          "fileType": "PDF",
+          "pagesOrSlides": "PDF · 32 pages",
+          "pageCount": 32,
+          "conceptsCount": 15,
+          "updatedAt": "Updated 5 days ago",
+          "authorNote": "Cross-Subject Link",
+          "recallProgress": 54,
+          "statusBadge": "Needs Review",
+          "keyConcepts": [
+            "Banker's Algorithm",
+            "Resource Allocation Graph",
+            "Wait-Die Scheme"
+          ],
+          "actionLabel": "Deep Drill (12 Qs)",
+          "actionType": "drill",
+          "questionCount": 12,
+          "activeInAiScope": false,
+          "excerptPage": 19,
+          "excerptSection": "§ 4.3",
+          "excerptText": "\"Coffman Deadlock Conditions: (1) Mutual Exclusion, (2) Hold and Wait, (3) No Preemption, and (4) Circular Wait. In database concurrency control, Wait-Die (non-preemptive) and Wound-Wait (preemptive) use transaction timestamps to eliminate circular wait.\"",
+          "fullSummary": "Operating Systems unit covering Coffman’s four necessary conditions for deadlock, Resource Allocation Graphs (claim edges vs assignment edges), Dijkstra’s Banker’s Algorithm for safe state verification, and timestamp deadlock prevention."
+        },
+        {
+          "id": "mat-dbms-7",
+          "title": "DBMS Lecture 7 — Recovery System",
+          "fileName": "Lecture 7 — Concurrency Slides.pptx",
+          "subject": "DBMS",
+          "subjectCode": "DBMS",
+          "fileType": "PPTX",
+          "pagesOrSlides": "PPTX · 40 slides",
+          "pageCount": 36,
+          "conceptsCount": 8,
+          "updatedAt": "Updated 1 week ago",
+          "authorNote": "Department Deck",
+          "recallProgress": 70,
+          "statusBadge": null,
+          "keyConcepts": [
+            "Log-Based Recovery",
+            "Checkpoints",
+            "Shadow Paging"
+          ],
+          "actionLabel": "Quiz (8 Qs)",
+          "actionType": "quiz",
+          "questionCount": 8,
+          "activeInAiScope": true,
+          "excerptPage": 22,
+          "excerptSection": "Slide 22",
+          "excerptText": "\"ARIES Recovery Algorithm operates in three phases after a system crash: (1) Analysis Phase identifies dirty pages in buffer pool and active transactions at crash time; (2) Redo Phase repeats history from the smallest recLSN; (3) Undo Phase rolls back loser transactions in reverse log order.\"",
+          "fullSummary": "Professor K. Vance’s slide deck on Concurrency & Crash Recovery: deferred vs immediate database modification, fuzzy checkpointing, shadow paging tables, and the ARIES 3-phase recovery protocol."
+        },
+        {
+          "id": "mat-dbms-index",
+          "title": "Indexing & B+ Trees Summary",
+          "fileName": "Indexing & B+ Trees Summary.md",
+          "subject": "DBMS",
+          "subjectCode": "DBMS",
+          "fileType": "Markdown Doc",
+          "pagesOrSlides": "Markdown Doc",
+          "pageCount": 11,
+          "conceptsCount": 7,
+          "updatedAt": "Updated 2 weeks ago",
+          "authorNote": "Self-Curated Revision",
+          "recallProgress": 80,
+          "statusBadge": null,
+          "keyConcepts": [
+            "Clustered vs Dense Index",
+            "B+ Tree Node Split",
+            "Hash Indexing"
+          ],
+          "actionLabel": "Quiz (6 Qs)",
+          "actionType": "quiz",
+          "questionCount": 6,
+          "activeInAiScope": false,
+          "excerptPage": 3,
+          "excerptSection": "§ 2.1",
+          "excerptText": "\"In a B+ Tree of order m, every internal node other than the root has between ⌈m/2⌉ and m children. All data pointers reside exclusively in the leaf nodes, which are linked sequentially via sibling pointers to support O(log_m N + K) range queries.\"",
+          "fullSummary": "Structured markdown revision notes comparing primary, clustering, and secondary dense/sparse indices, dynamic multilevel B+ tree insertion/deletion complexity, and extendable vs linear hashing."
+        },
+        {
+          "id": "mat-cn-tcp",
+          "title": "CN Unit 3 — TCP Congestion & Flow Control",
+          "fileName": "CN Unit 3 — TCP Congestion.pdf",
+          "subject": "Computer Networks",
+          "subjectCode": "CN",
+          "fileType": "PDF",
+          "pagesOrSlides": "PDF · 28 pages",
+          "pageCount": 28,
+          "conceptsCount": 11,
+          "updatedAt": "Updated 6 days ago",
+          "authorNote": "Prof. R. Menon",
+          "recallProgress": 76,
+          "statusBadge": null,
+          "keyConcepts": [
+            "Slow Start & AIMD",
+            "Sliding Window Protocol",
+            "Fast Retransmit"
+          ],
+          "actionLabel": "Quiz (8 Qs)",
+          "actionType": "quiz",
+          "questionCount": 8,
+          "activeInAiScope": false,
+          "excerptPage": 11,
+          "excerptSection": "§ 3.5",
+          "excerptText": "\"TCP Reno transitions from Slow Start (exponential cwnd doubling per RTT) to Congestion Avoidance (linear additive increase) once cwnd >= ssthresh. On triple duplicate ACK, ssthresh is halved and Fast Recovery is entered without resetting cwnd to 1 MSS.\"",
+          "fullSummary": "Transport layer reliability mechanisms, Go-Back-N vs Selective Repeat sliding windows, Jacobson’s RTT estimation formula, and TCP Tahoe vs Reno congestion window state machines."
+        },
+        {
+          "id": "mat-web-auth",
+          "title": "Web Tech — OAuth 2.0, JWT & Session Security",
+          "fileName": "Web Security & JWT Notes.pdf",
+          "subject": "Web Technology",
+          "subjectCode": "WEB",
+          "fileType": "PDF",
+          "pagesOrSlides": "PDF · 16 pages",
+          "pageCount": 16,
+          "conceptsCount": 10,
+          "updatedAt": "Updated 1 week ago",
+          "authorNote": "Lab Architecture Guide",
+          "recallProgress": 84,
+          "statusBadge": "Mastered",
+          "keyConcepts": [
+            "HMAC-SHA256 Signatures",
+            "CORS & SameSite Cookies",
+            "XSS & CSRF Prevention"
+          ],
+          "actionLabel": "Review (5 Qs)",
+          "actionType": "review",
+          "questionCount": 5,
+          "activeInAiScope": false,
+          "excerptPage": 6,
+          "excerptSection": "§ 2.2",
+          "excerptText": "\"Stateless JSON Web Tokens consist of Header.Payload.Signature encoded in Base64URL. The server verifies integrity using HMAC-SHA256 or RSA public/private key pairs without requiring a database lookup per request.\"",
+          "fullSummary": "Modern web application security covering PKCE OAuth 2.0 flows, HttpOnly cookie attributes, Content Security Policy headers, and cryptographic password derivation with scrypt and Argon2."
+        },
+        {
+          "id": "mat-math-graph",
+          "title": "Discrete Math — Graph Theory & Topological Sort",
+          "fileName": "Graph Theory Lecture Notes.pdf",
+          "subject": "Mathematics",
+          "subjectCode": "MATH",
+          "fileType": "PDF",
+          "pagesOrSlides": "PDF · 22 pages",
+          "pageCount": 22,
+          "conceptsCount": 14,
+          "updatedAt": "Updated 9 days ago",
+          "authorNote": "Dept. of Mathematics",
+          "recallProgress": 79,
+          "statusBadge": null,
+          "keyConcepts": [
+            "Directed Acyclic Graphs (DAG)",
+            "Kahn's Algorithm",
+            "Strongly Connected Components"
+          ],
+          "actionLabel": "Quiz (10 Qs)",
+          "actionType": "quiz",
+          "questionCount": 10,
+          "activeInAiScope": false,
+          "excerptPage": 9,
+          "excerptSection": "Theorem 4.1",
+          "excerptText": "\"A directed graph G = (V, E) admits a linear topological ordering of its vertices if and only if G is a Directed Acyclic Graph (DAG). Cycle detection via DFS back-edges or Kahn’s in-degree queue runs in O(|V| + |E|) time.\"",
+          "fullSummary": "Formal proofs on directed graphs, Eulerian and Hamiltonian paths, topological sorting for dependency resolution (directly applicable to DBMS precedence graphs), and Tarjan’s SCC algorithm."
+        }
+      ],
+      "activities": [
+        {
+          "id": "act-1",
+          "type": "document",
+          "title": "Added document",
+          "highlight": "OS Unit 4.pdf",
+          "timestamp": "2 hours ago"
+        },
+        {
+          "id": "act-2",
+          "type": "quiz",
+          "title": "Completed quiz",
+          "highlight": "Concurrency Control",
+          "meta": "8 / 10 score",
+          "timestamp": "Yesterday"
+        },
+        {
+          "id": "act-3",
+          "type": "ai",
+          "title": "Asked AI question",
+          "highlight": "\"Deadlock vs Starvation\"",
+          "timestamp": "Yesterday"
+        },
+        {
+          "id": "act-4",
+          "type": "revision",
+          "title": "Revised topic",
+          "highlight": "ACID Properties",
+          "timestamp": "2 days ago"
+        }
+      ],
+      "revisionTopics": [
+        {
+          "id": "rev-conflict",
+          "subject": "DBMS",
+          "title": "Conflict Serializability",
+          "urgency": "Urgent",
+          "reason": "3 days since review · Missed on Quiz 4",
+          "estMinutes": 4,
+          "recallScore": 62,
+          "lastReviewed": "3 days ago",
+          "sourceDoc": "DBMS Unit 3.pdf · p. 14",
+          "flashcards": [
+            {
+              "front": "When do two operations O_i(x) and O_j(x) in a schedule S conflict?",
+              "back": "They belong to different transactions (T_i ≠ T_j), access the exact same data item x, and at least one of the operations is a Write(x).",
+              "citation": "DBMS Unit 3.pdf · p. 14 § 3.2"
+            },
+            {
+              "front": "How do you prove a schedule S is conflict serializable using a Precedence Graph?",
+              "back": "Construct a directed graph where nodes are transactions and edge T_i → T_j exists if an operation in T_i precedes and conflicts with one in T_j. S is conflict serializable iff the precedence graph has NO cycles.",
+              "citation": "Class Notes — Transactions.pdf · p. 4"
+            },
+            {
+              "front": "Can T2: R(A) be swapped past T1: W(A) in schedule S1?",
+              "back": "No. R(A) and W(A) on the same item A from different transactions form a Read-Write (RW) conflict. Swapping them changes the value read by T2.",
+              "citation": "DBMS Unit 3.pdf · p. 15"
+            }
+          ]
+        },
+        {
+          "id": "rev-deadlock",
+          "subject": "Operating Systems",
+          "title": "Deadlock Prevention",
+          "urgency": "Low Retention",
+          "reason": "OS Unit 4 · Hold & Wait conditions",
+          "estMinutes": 6,
+          "recallScore": 54,
+          "lastReviewed": "5 days ago",
+          "sourceDoc": "OS Unit 4.pdf · p. 19",
+          "flashcards": [
+            {
+              "front": "Contrast Wait-Die vs. Wound-Wait timestamp schemes for deadlock prevention.",
+              "back": "Wait-Die is non-preemptive: older transaction waits for younger, younger dies (aborts) if requesting held lock. Wound-Wait is preemptive: older transaction wounds (preempts) younger, while younger is allowed to wait for older.",
+              "citation": "OS Unit 4.pdf · p. 19 § 4.3"
+            },
+            {
+              "front": "How can the \"Hold and Wait\" Coffman condition be eliminated?",
+              "back": "Require a process/transaction to request and be allocated all required resources atomically before execution begins, or allow it to request resources only when it currently holds none.",
+              "citation": "OS Unit 4.pdf · p. 17"
+            }
+          ]
+        },
+        {
+          "id": "rev-2pl",
+          "subject": "DBMS",
+          "title": "Strict Two-Phase Locking (2PL)",
+          "urgency": "Due Soon",
+          "reason": "Scheduled spaced repetition interval (Day 7)",
+          "estMinutes": 5,
+          "recallScore": 74,
+          "lastReviewed": "4 days ago",
+          "sourceDoc": "Lecture 7 — Concurrency Slides.pptx · Slide 18",
+          "flashcards": [
+            {
+              "front": "Why is Strict 2PL preferred over Basic 2PL in production database engines?",
+              "back": "Basic 2PL guarantees conflict serializability but remains vulnerable to cascading rollbacks. Strict 2PL holds all exclusive (write) locks until Commit/Abort, ensuring both serializability and cascadeless schedules.",
+              "citation": "Lecture 7 — Concurrency Slides.pptx · Slide 18"
+            }
+          ]
+        },
+        {
+          "id": "rev-acid",
+          "subject": "DBMS",
+          "title": "ACID Properties & WAL",
+          "urgency": "Mastered",
+          "reason": "92% accuracy across last 3 active recall sessions",
+          "estMinutes": 3,
+          "recallScore": 92,
+          "lastReviewed": "2 days ago",
+          "sourceDoc": "Class Notes — Transactions.pdf · p. 2",
+          "flashcards": [
+            {
+              "front": "Which recovery mechanism enforces Atomicity vs. Durability?",
+              "back": "Atomicity is enforced via UNDO logging (rolling back uncommitted changes), whereas Durability is enforced via REDO logging and Write-Ahead Logging (flushing log records to stable storage before commit).",
+              "citation": "Class Notes — Transactions.pdf · p. 2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "usr-bb5fffd7331d",
+      "name": "Vipul Bhosale",
+      "email": "vipul@gmail.com",
+      "avatarUrl": null,
+      "passwordHash": "d014c384e9d9e057d1e689c852ba80ace54d62c84385350506df4545c7f4a04ef198ed3a2cdf7f59177b782e1db3c9ca739f838640dbfb32d74b13b619b8ef10",
+      "passwordSalt": "37a726272b34aa55db007717e5a543c9",
+      "course": "Computer Science",
+      "year": "Yr 4",
+      "streakDays": 1,
+      "onboarded": true,
+      "subjects": [
+        "dsa",
+        "madf",
+        "ld"
+      ],
+      "goals": [
+        "Understand concepts deeply",
+        "Prepare for semester exams",
+        "Generate AI summaries from my PDFs",
+        "Test my knowledge with active recall",
+        "Organize study material by subject"
+      ],
+      "weeklyCompletedModules": 0,
+      "weeklyTargetModules": 20,
+      "createdAt": "2026-09-28T16:10:34.735Z",
+      "preferences": {
+        "theme": "light",
+        "emailNotifications": true,
+        "revisionReminders": true,
+        "strictGroundedMode": true
+      },
+      "materials": [
+        {
+          "id": "mat-14ede666",
+          "title": "NoteNest Problem Statement",
+          "fileName": "NoteNest_Problem_Statement.pdf",
+          "fileSize": "29 KB",
+          "subject": "dsa",
+          "subjectCode": "DSA",
+          "fileType": "PDF",
+          "pagesOrSlides": "PDF · 6 pages",
+          "pageCount": 6,
+          "conceptsCount": 4,
+          "updatedAt": "Uploaded Just now",
+          "authorNote": "Added by Vipul Bhosale",
+          "recallProgress": 70,
+          "statusBadge": "Primary",
+          "keyConcepts": [
+            "Fragmented Study Material Problem",
+            "Subject-Wise Knowledge Hub",
+            "Grounded AI Summarization",
+            "Active Recall & Exam Readiness"
+          ],
+          "actionLabel": "Quiz (8 Qs)",
+          "actionType": "quiz",
+          "questionCount": 8,
+          "activeInAiScope": true,
+          "excerptPage": 1,
+          "excerptSection": "§ 1.1",
+          "excerptText": "\"Students struggle with fragmented study materials scattered across PDFs, slides, and handwritten notes, leading to passive reading and poor exam retention. NoteNest unifies subject-organized document management, grounded AI topic summarization, and active recall flashcards.\"",
+          "fullSummary": "NoteNest Problem Statement: Engineering and university students face severe information fragmentation across lecture PDFs, slides, and notes, resulting in last-minute cramming and low retention. NoteNest solves this by providing a centralized subject-wise repository, instant document-grounded AI topic summaries, interactive Q&A with citations, and spaced-repetition flashcards.",
+          "rawContent": "NoteNest Problem Statement\n\n1. Executive Problem Overview\nUniversity students manage dozens of heterogeneous study artifacts across multiple courses every semester—including lecture PDFs, slide decks, handwritten class notes, and textbook excerpts. Because these materials remain scattered across local folders and messaging apps, students spend excessive time searching for concepts rather than understanding them.\n\n2. Core Student Pain Points\n- Material Fragmentation: Notes and PDFs are not organized by subject hierarchy or mapped to syllabus topics.\n- Passive Reading Trap: Re-reading dense 40-page PDFs creates an illusion of competence without testing active recall.\n- Generic Unverified AI Answers: General-purpose chatbots hallucinate or give off-syllabus answers that do not match professor lecture notes.\n- Lack of Revision Prioritization: Students lack visibility into which topics have low retention before exams.\n\n3. Proposed Solution: NoteNest Architecture\n- Subject-Wise Document Repository: Structured folders per course with instant PDF/document viewing, search, and topic organization.\n- Grounded AI Topic Summarizer: Generates executive overviews, key takeaways, core definitions, exam high-yield tips, and self-check Q&As strictly grounded in uploaded files.\n- Active Recall & Flashcard Engine: Converts document concepts into interactive flashcards and quizzes to track mastery.",
+          "aiSummary": {
+            "overview": "NoteNest Problem Statement: Engineering and university students face severe information fragmentation across lecture PDFs, slides, and notes, resulting in last-minute cramming and low retention. NoteNest solves this by providing a centralized subject-wise repository, instant document-grounded AI topic summaries, interactive Q&A with citations, and spaced-repetition flashcards.",
+            "keyTakeaways": [
+              "Eliminates study material fragmentation by organizing all PDFs, slides, and notes into structured subject repositories with instant document viewing.",
+              "Replaces passive re-reading with instant AI-synthesized topic summaries, key definitions, and high-yield exam takeaways grounded in the student's own files.",
+              "Prevents AI hallucination and off-syllabus confusion through strict document grounding and verifiable section citations.",
+              "Bridges the gap between reading and retention by automatically generating self-check questions and active recall flashcards per document."
+            ],
+            "coreDefinitions": [
+              {
+                "term": "Material Fragmentation",
+                "explanation": "The scattering of course PDFs, lecture slides, and notes across disconnected storage locations, increasing cognitive load during exam preparation."
+              },
+              {
+                "term": "Grounded AI Summarization",
+                "explanation": "AI synthesis restricted strictly to the student's uploaded study material so definitions and takeaways align with the course syllabus."
+              },
+              {
+                "term": "Active Recall Loop",
+                "explanation": "Testing memory retrieval via self-check questions and flashcards immediately after studying a document to strengthen long-term retention."
+              },
+              {
+                "term": "Subject-Wise Knowledge Hub",
+                "explanation": "Hierarchical workspace where each academic subject maintains its own documents, AI summaries, and mastery metrics."
+              }
+            ],
+            "examHighYieldPoints": [
+              "Focus on the 3-pillar workflow: Organize by Subject -> Summarize Topic with Grounded AI -> Reinforce via Active Recall Flashcards.",
+              "Contrast passive review (re-reading PDFs) against active recall (self-check Q&As and spaced repetition).",
+              "Highlight how document-level AI scoping prevents cross-subject confusion."
+            ],
+            "selfCheckQuestions": [
+              {
+                "question": "What primary academic challenges does the NoteNest Problem Statement address?",
+                "answer": "It addresses study material fragmentation across courses, low retention caused by passive reading of long PDFs, and unverified answers from generic AI tools."
+              },
+              {
+                "question": "How does NoteNest ensure AI summaries remain accurate to a student's course syllabus?",
+                "answer": "By grounding the AI summarizer and Q&A assistant directly in the extracted text and PDF content of the student's uploaded subject documents."
+              },
+              {
+                "question": "How does NoteNest convert uploaded documents into measurable exam readiness?",
+                "answer": "Every uploaded document is synthesized into structured key takeaways, core definitions, exam tips, and interactive flashcards tracked by recall score."
+              }
+            ],
+            "generatedAt": "Just now"
+          }
+        },
+        {
+          "id": "mat-61a9ea73",
+          "title": "NoteNest User Research User Journey Mapping",
+          "fileName": "NoteNest_User_Research_User_Journey_Mapping.pdf",
+          "fileSize": "38 KB",
+          "subject": "dsa",
+          "subjectCode": "DSA",
+          "fileType": "PDF",
+          "pagesOrSlides": "PDF · 9 pages",
+          "pageCount": 9,
+          "conceptsCount": 4,
+          "updatedAt": "Uploaded Just now",
+          "authorNote": "Added by Vipul Bhosale",
+          "recallProgress": 70,
+          "statusBadge": "Primary",
+          "keyConcepts": [
+            "Student Persona & Empathy Map",
+            "5-Stage User Journey Map",
+            "Friction Points & Opportunity Areas",
+            "UX Touchpoints & Retention Loop"
+          ],
+          "actionLabel": "Quiz (8 Qs)",
+          "actionType": "quiz",
+          "questionCount": 8,
+          "activeInAiScope": true,
+          "excerptPage": 1,
+          "excerptSection": "§ 1.1",
+          "excerptText": "\"NoteNest User Research & User Journey Mapping analyzes how university students discover, organize, summarize, and revise course materials across five key stages: Onboarding, Subject Organization, Document Upload, AI Topic Summarization, and Exam Revision.\"",
+          "fullSummary": "NoteNest User Research & User Journey Mapping: Comprehensive UX research study detailing target student personas, pain points in traditional exam preparation, and the 5-stage user journey from subject setup and PDF upload to AI topic summarization and active recall mastery.",
+          "rawContent": "NoteNest User Research & User Journey Mapping\n\n1. User Research Objectives & Methodology\nConducted contextual inquiries and surveys with undergraduate engineering and science students to understand how they collect, read, summarize, and revise study materials before midterms and finals.\n\n2. Primary Student Personas\n- The Overwhelmed Exam Crammer: Has 15+ unread lecture PDFs across 5 subjects days before the exam; needs instant high-yield topic summaries and exam tips.\n- The Structured Synthesizer: Organizes notes weekly by subject and wants a unified workspace to view PDFs, extract definitions, and test recall.\n\n3. Five-Stage User Journey Map\n- Stage 1: Subject Setup & Onboarding — Student creates profile, selects semester subjects, and establishes study goals.\n- Stage 2: Document Ingestion & Viewing — Student uploads course PDFs into specific subjects and views/searches documents directly in-app.\n- Stage 3: AI Topic Summarization — Student clicks Summarize Topic beside any document to generate structured overviews, definitions, and exam tips.\n- Stage 4: Contextual Q&A Verification — Student asks targeted questions in the AI Study Assistant scoped to selected subject PDFs.\n- Stage 5: Active Recall & Mastery — Student reviews auto-generated flashcards and quizzes to boost retention scores.",
+          "aiSummary": {
+            "overview": "NoteNest User Research & User Journey Mapping: Comprehensive UX research study detailing target student personas, pain points in traditional exam preparation, and the 5-stage user journey from subject setup and PDF upload to AI topic summarization and active recall mastery.",
+            "keyTakeaways": [
+              "Defines core student personas (Overwhelmed Exam Crammer vs. Structured Synthesizer) based on qualitative user interviews and study habit analysis.",
+              "Maps the end-to-end 5-stage student journey: Onboarding -> Subject Organization -> Document Upload & Viewing -> AI Topic Summarization -> Active Recall.",
+              "Identifies critical UX friction points in existing tools: hidden actions, inability to preview uploaded PDFs in-place, and confusing cross-subject navigation.",
+              "Establishes clear design solutions: placing View Document, Summarize Topic, and Delete actions directly beside every file inside each subject and search bar."
+            ],
+            "coreDefinitions": [
+              {
+                "term": "User Journey Map",
+                "explanation": "A visual and structural timeline tracing a student's actions, thoughts, emotions, pain points, and product touchpoints across the study lifecycle."
+              },
+              {
+                "term": "Student Persona",
+                "explanation": "Archetypal representation of target learners synthesizing their academic goals, study habits, and technology frustrations."
+              },
+              {
+                "term": "In-Context Document Action",
+                "explanation": "UX principle of placing View, Summarize Topic, and Delete controls directly beside each document in subject lists and global search results."
+              },
+              {
+                "term": "Touchpoint Optimization",
+                "explanation": "Streamlining high-frequency student workflows (searching a PDF, viewing its contents, and generating an AI summary) into a single click."
+              }
+            ],
+            "examHighYieldPoints": [
+              "When analyzing a User Journey Map, always pair each user stage with (1) User Goal, (2) Pain Point/Friction, and (3) Product Opportunity/Solution.",
+              "Highlight how reducing clicks between uploading a PDF, viewing it, and summarizing its topic directly increases daily student engagement.",
+              "Connect qualitative user research insights directly to concrete interface features."
+            ],
+            "selfCheckQuestions": [
+              {
+                "question": "What are the five stages of the NoteNest Student User Journey Map?",
+                "answer": "1. Subject Setup & Onboarding, 2. Document Upload & In-App Viewing, 3. Grounded AI Topic Summarization, 4. Contextual AI Q&A, and 5. Active Recall & Revision."
+              },
+              {
+                "question": "What key usability friction did user research uncover regarding subject and document navigation?",
+                "answer": "Students experienced confusion when document viewing and AI summarization were separated from subject folders, motivating direct View, Summarize Topic, and Delete actions beside every document."
+              },
+              {
+                "question": "How do the two primary student personas differ in their usage of NoteNest?",
+                "answer": "The Structured Synthesizer uploads and organizes materials weekly by subject, whereas the Exam Crammer relies heavily on instant AI Topic Summaries and high-yield exam points before tests."
+              }
+            ],
+            "generatedAt": "Just now"
+          }
+        }
+      ],
+      "activities": [
+        {
+          "id": "act-1790612100331",
+          "type": "document",
+          "title": "Uploaded & AI-summarized",
+          "highlight": "NoteNest_Problem_Statement.pdf",
+          "timestamp": "Just now"
+        },
+        {
+          "id": "act-1790612052580",
+          "type": "ai",
+          "title": "Generated AI Summary for",
+          "highlight": "NoteNest_User_Research_User_Journey_Mapping.pdf",
+          "timestamp": "Just now"
+        },
+        {
+          "id": "act-1790611953546",
+          "type": "ai",
+          "title": "Asked AI question",
+          "highlight": "\"what is the topic about\"",
+          "timestamp": "Just now"
+        },
+        {
+          "id": "act-1790611927433",
+          "type": "document",
+          "title": "Uploaded & AI-summarized",
+          "highlight": "NoteNest_User_Research_User_Journey_Mapping.pdf",
+          "timestamp": "Just now"
+        }
+      ],
+      "revisionTopics": [
+        {
+          "id": "rev-mat-14ede666",
+          "title": "NoteNest Problem Statement",
+          "subject": "dsa",
+          "urgency": "Due Soon",
+          "recallScore": 70,
+          "lastReviewed": "Uploaded just now",
+          "estMinutes": 5,
+          "reason": "Active recall flashcards synthesized from NoteNest_Problem_Statement.pdf",
+          "sourceDoc": "NoteNest_Problem_Statement.pdf",
+          "flashcards": [
+            {
+              "front": "What primary academic challenges does the NoteNest Problem Statement address?",
+              "back": "Study material fragmentation across courses, low retention from passive PDF reading, and unverified answers from generic AI tools.",
+              "citation": "NoteNest_Problem_Statement.pdf"
+            },
+            {
+              "front": "How does NoteNest ensure AI summaries remain accurate to a student's course syllabus?",
+              "back": "By grounding the AI summarizer and Q&A assistant directly in the extracted text and PDF content of the student's uploaded subject documents.",
+              "citation": "NoteNest_Problem_Statement.pdf"
+            }
+          ]
+        },
+        {
+          "id": "rev-mat-61a9ea73",
+          "title": "NoteNest User Research User Journey Mapping",
+          "subject": "dsa",
+          "urgency": "Due Soon",
+          "recallScore": 70,
+          "lastReviewed": "Uploaded just now",
+          "estMinutes": 5,
+          "reason": "Active recall flashcards synthesized from NoteNest_User_Research_User_Journey_Mapping.pdf",
+          "sourceDoc": "NoteNest_User_Research_User_Journey_Mapping.pdf",
+          "flashcards": [
+            {
+              "front": "What are the five stages of the NoteNest Student User Journey Map?",
+              "back": "1. Subject Setup & Onboarding, 2. Document Upload & In-App Viewing, 3. Grounded AI Topic Summarization, 4. Contextual AI Q&A, and 5. Active Recall & Revision.",
+              "citation": "NoteNest_User_Research_User_Journey_Mapping.pdf"
+            },
+            {
+              "front": "What usability improvement emerged from the NoteNest user journey research?",
+              "back": "Placing View Document, Summarize Topic, and Delete actions directly beside each document inside every subject and search bar result.",
+              "citation": "NoteNest_User_Research_User_Journey_Mapping.pdf"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
