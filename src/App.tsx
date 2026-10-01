@@ -481,8 +481,7 @@ export default function App() {
               className="lg:hidden shrink-0 cursor-pointer"
               aria-label="Go to Dashboard"
             >
-              <NoteNestLogo size="xs" showWordmark={false} className="sm:hidden" />
-              <NoteNestLogo size="xs" className="hidden sm:inline-flex" />
+              <NoteNestLogo size="xs" showWordmark={false} />
             </button>
 
             <div className="relative flex-1 min-w-0">
