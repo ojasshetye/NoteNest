@@ -7,7 +7,6 @@ import {
   FileText,
   TrendingUp,
   Award,
-  Flame,
   AlertTriangle,
   UploadCloud,
   X,
@@ -25,6 +24,7 @@ import {
   Send,
   Eye,
   Trash2,
+  ArrowRight,
 } from 'lucide-react';
 import {
   AiDocumentSummary,
@@ -214,8 +214,8 @@ export const AiSummaryModal: React.FC<AiSummaryModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#0F172A]/40 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white border border-[#E2E8F0] rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-5 shadow-xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-[#0F172A]/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+      <div className="bg-white border border-[#E2E8F0] rounded-3xl max-w-2xl w-full p-5 sm:p-8 space-y-5 shadow-xl max-h-[90dvh] overflow-y-auto">
         {/* Top Header */}
         <div className="flex items-start justify-between gap-4 border-b border-[#E2E8F0] pb-4">
           <div className="space-y-1">
@@ -448,8 +448,9 @@ export const AiSummaryModal: React.FC<AiSummaryModalProps> = ({
               }}
               className="px-5 py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-semibold flex items-center gap-2 font-display cursor-pointer"
             >
-              <Lightbulb className="w-3.5 h-3.5" />
-              Ask Follow-up Questions in AI Study Assistant →
+              <Lightbulb className="w-3.5 h-3.5 shrink-0" />
+              <span>Ask Follow-up Questions in AI Study Assistant</span>
+              <ArrowRight className="w-3.5 h-3.5 shrink-0" />
             </button>
           )}
         </div>
@@ -594,13 +595,14 @@ export const RevisionView: React.FC<RevisionViewProps> = ({
                           {topic.subject}
                         </span>
                         <span
-                          className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
+                          className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold inline-flex items-center gap-1.5 ${
                             topic.urgency === 'Urgent'
                               ? 'bg-[#FEE2E2] text-[#DC2626]'
                               : 'bg-[#FEF3C7] text-[#D97706]'
                           }`}
                         >
-                          ● {topic.urgency}
+                          <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                          <span>{topic.urgency}</span>
                         </span>
                       </div>
                       <h3 className="text-lg font-bold text-[#0F172A] font-display">
@@ -696,8 +698,9 @@ export const RevisionView: React.FC<RevisionViewProps> = ({
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-semibold text-[#10B981]">{topic.subject}</span>
-                    <span className="px-2 py-0.5 rounded-full bg-[#DCFCE7] text-[#10B981] text-[11px] font-semibold tabular-nums">
-                      ✓ {topic.recallScore}% Mastered
+                    <span className="px-2 py-0.5 rounded-full bg-[#DCFCE7] text-[#10B981] text-[11px] font-semibold tabular-nums inline-flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3 shrink-0" />
+                      <span>{topic.recallScore}% Mastered</span>
                     </span>
                   </div>
                   <h3 className="text-base font-bold text-[#0F172A] font-display">{topic.title}</h3>
@@ -707,9 +710,10 @@ export const RevisionView: React.FC<RevisionViewProps> = ({
                     <button
                       type="button"
                       onClick={() => onNavigate('quizzes')}
-                      className="text-xs font-semibold text-[#2563EB] hover:underline cursor-pointer"
+                      className="text-xs font-semibold text-[#2563EB] hover:underline inline-flex items-center gap-1 cursor-pointer"
                     >
-                      Quick Quiz →
+                      <span>Quick Quiz</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
@@ -770,7 +774,7 @@ export const RevisionView: React.FC<RevisionViewProps> = ({
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <button
                 type="button"
                 onClick={() => setFlipped(!flipped)}
@@ -786,18 +790,20 @@ export const RevisionView: React.FC<RevisionViewProps> = ({
                     setCardIndex((prev) => prev + 1);
                     setFlipped(false);
                   }}
-                  className="px-5 py-2.5 rounded-xl bg-[#2563EB] text-white text-xs font-semibold font-display cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-[#2563EB] text-white text-xs font-semibold font-display inline-flex items-center gap-1.5 cursor-pointer"
                 >
-                  Next Concept Card →
+                  <span>Next Concept Card</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               ) : (
                 <button
                   type="button"
                   disabled={completing}
                   onClick={() => handleCompleteRevision(activeTopic.id)}
-                  className="px-5 py-2.5 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white text-xs font-semibold font-display cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white text-xs font-semibold font-display inline-flex items-center gap-1.5 cursor-pointer"
                 >
-                  {completing ? 'Updating Mastery...' : '✓ Complete Revision (+18% Recall)'}
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  <span>{completing ? 'Updating Mastery...' : 'Complete Revision (+18% Recall)'}</span>
                 </button>
               )}
             </div>
@@ -1230,8 +1236,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               }
               className="px-4 py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-semibold flex items-center gap-1.5 font-display cursor-pointer shadow-xs"
             >
-              <Plus className="w-4 h-4" />
-              + Add New Document
+              <Plus className="w-4 h-4 shrink-0" />
+              <span>Add New Document</span>
             </button>
           )}
         </div>
@@ -1372,10 +1378,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                   }
                   className="px-4 py-2 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-semibold flex items-center gap-1.5 font-display cursor-pointer shadow-2xs"
                 >
-                  <Plus className="w-3.5 h-3.5" />
-                  {selectedProfileSubject === 'ALL'
-                    ? '+ Add New Document'
-                    : `+ Add Document to ${selectedProfileSubject}`}
+                  <Plus className="w-3.5 h-3.5 shrink-0" />
+                  <span>
+                    {selectedProfileSubject === 'ALL'
+                      ? 'Add New Document'
+                      : `Add Document to ${selectedProfileSubject}`}
+                  </span>
                 </button>
               )}
             </div>
@@ -1407,10 +1415,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                   }
                   className="px-5 py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-semibold inline-flex items-center gap-2 font-display cursor-pointer"
                 >
-                  <Plus className="w-4 h-4" />
-                  {selectedProfileSubject === 'ALL'
-                    ? '+ Add First Document'
-                    : `+ Add Document to ${selectedProfileSubject}`}
+                  <Plus className="w-4 h-4 shrink-0" />
+                  <span>
+                    {selectedProfileSubject === 'ALL'
+                      ? 'Add First Document'
+                      : `Add Document to ${selectedProfileSubject}`}
+                  </span>
                 </button>
               )}
             </div>
@@ -1657,7 +1667,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       </form>
 
       {/* Sign Out Card */}
-      <div className="bg-white border border-[#E2E8F0] rounded-2xl p-5 flex items-center justify-between">
+      <div className="bg-white border border-[#E2E8F0] rounded-2xl p-5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h3 className="text-sm font-bold text-[#0F172A] font-display">Session Management</h3>
           <p className="text-xs text-[#64748B]">
@@ -1919,8 +1929,8 @@ export const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#0F172A]/40 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white border border-[#E2E8F0] rounded-3xl max-w-lg w-full p-6 sm:p-7 space-y-5 shadow-xl max-h-[92vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-[#0F172A]/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+      <div className="bg-white border border-[#E2E8F0] rounded-3xl max-w-lg w-full p-5 sm:p-7 space-y-5 shadow-xl max-h-[92dvh] overflow-y-auto">
         <div className="flex items-start justify-between">
           <div>
             <h2 className="text-xl font-bold text-[#0F172A] font-display">
@@ -1969,8 +1979,9 @@ export const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
                   <span className="truncate max-w-xs">{fileName}</span>
                   {fileSize && <span className="text-xs font-normal">({fileSize})</span>}
                 </p>
-                <p className="text-[11px] text-[#065F46] font-semibold">
-                  ✓ File ready — click &ldquo;Upload &amp; Get AI Summary&rdquo; below!
+                <p className="text-[11px] text-[#065F46] font-semibold inline-flex items-center justify-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981] shrink-0" />
+                  <span>File ready — click &ldquo;Upload &amp; Get AI Summary&rdquo; below!</span>
                 </p>
               </div>
             ) : (
@@ -2079,10 +2090,13 @@ export const AddMaterialModal: React.FC<AddMaterialModalProps> = ({
               onClick={() => handleUploadSubmit(true)}
               className="px-5 py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-semibold flex items-center justify-center gap-2 font-display cursor-pointer shadow-xs disabled:opacity-50"
             >
-              <Sparkles className="w-4 h-4" />
-              {stage === 'submitting'
-                ? 'Uploading & Generating AI Summary...'
-                : 'Upload & Get AI Summary →'}
+              <Sparkles className="w-4 h-4 shrink-0" />
+              <span>
+                {stage === 'submitting'
+                  ? 'Uploading & Generating AI Summary...'
+                  : 'Upload & Get AI Summary'}
+              </span>
+              {stage !== 'submitting' && <ArrowRight className="w-3.5 h-3.5 shrink-0" />}
             </button>
           </div>
         </div>

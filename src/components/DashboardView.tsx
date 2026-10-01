@@ -63,8 +63,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* Greeting & Quick Actions Header */}
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-[#0F172A] font-display tracking-tight">
-            Welcome, {firstName} 👋
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#0F172A] font-display tracking-tight">
+            Welcome, {firstName}
           </h1>
           <p className="text-sm text-[#64748B] mt-0.5">
             {user.course ? `${user.course} · ${user.year}` : user.year} — Your personal academic
@@ -81,16 +81,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             }
             className="px-4 py-2.5 text-xs font-semibold text-white bg-[#2563EB] hover:bg-[#1D4ED8] rounded-xl transition-all flex items-center gap-2 font-display whitespace-nowrap shadow-xs cursor-pointer"
           >
-            <PlusCircle className="w-4 h-4" />
-            + Add New Document
+            <PlusCircle className="w-4 h-4 shrink-0" />
+            <span>Add New Document</span>
           </button>
           <button
             type="button"
             onClick={() => onNavigate('ai-assistant')}
             className="px-4 py-2.5 text-xs font-semibold text-[#2563EB] bg-[#EFF4FF] hover:bg-[#DBEAFE] border border-[#DBEAFE] rounded-xl transition-all flex items-center gap-2 font-display whitespace-nowrap cursor-pointer"
           >
-            <Sparkles className="w-4 h-4" />
-            AI Summary Portal →
+            <Sparkles className="w-4 h-4 shrink-0" />
+            <span>AI Summary Portal</span>
+            <ArrowRight className="w-3.5 h-3.5 shrink-0" />
           </button>
           <button
             type="button"
@@ -301,8 +302,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               }
               className="px-6 py-3 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-semibold inline-flex items-center gap-2 font-display cursor-pointer shadow-xs"
             >
-              <UploadCloud className="w-4 h-4" />
-              + Upload Your First Document
+              <UploadCloud className="w-4 h-4 shrink-0" />
+              <span>Upload Your First Document</span>
             </button>
             <button
               type="button"
@@ -347,10 +348,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   }
                   className="px-3.5 py-2 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-semibold flex items-center gap-1.5 font-display cursor-pointer"
                 >
-                  <UploadCloud className="w-3.5 h-3.5" />
-                  {selectedDashSubject === 'ALL'
-                    ? '+ Add New Document'
-                    : `+ Add Document to ${selectedDashSubject}`}
+                  <UploadCloud className="w-3.5 h-3.5 shrink-0" />
+                  <span>
+                    {selectedDashSubject === 'ALL'
+                      ? 'Add New Document'
+                      : `Add Document to ${selectedDashSubject}`}
+                  </span>
                 </button>
               </div>
             </div>
@@ -502,9 +505,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   <button
                     type="button"
                     onClick={() => onStartRevisionTopic(user.revisionTopics[0].id)}
-                    className="text-xs font-semibold text-[#2563EB] hover:underline cursor-pointer"
+                    className="text-xs font-semibold text-[#2563EB] hover:underline inline-flex items-center gap-1 cursor-pointer"
                   >
-                    Start →
+                    <span>Start</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
                 <p className="text-xs text-[#64748B]">

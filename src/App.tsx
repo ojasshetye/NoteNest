@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   LayoutGrid,
   FolderOpen,
@@ -14,7 +14,6 @@ import {
   HelpCircle,
   Settings,
   Search,
-  Flame,
   Plus,
   Bell,
   Menu,
@@ -22,6 +21,7 @@ import {
   LogOut,
   Sparkles,
   FileText,
+  ArrowLeft,
   ArrowRight,
   BookOpen,
   Eye,
@@ -44,6 +44,7 @@ import {
 } from './components/RevisionAndProgressViews';
 
 const SESSION_STORAGE_KEY = 'notenest_active_session_v2';
+const USER_CACHE_PREFIX = 'notenest_user_cache_v2_';
 
 const EMPTY_INITIAL_USER: UserProfile = {
   id: 'usr-pending',
@@ -82,7 +83,39 @@ export default function App() {
   const [knowledgeSubView, setKnowledgeSubView] = useState<string | undefined>(undefined);
   const [selectedRevisionTopicId, setSelectedRevisionTopicId] = useState<string | null>(null);
   const [selectedAiMaterialId, setSelectedAiMaterialId] = useState<string | null>(null);
-  const [user, setUser] = useState<UserProfile>(EMPTY_INITIAL_USER);
+  const [user, setUser] = useState<UserProfile>(() => {
+    const token = localStorage.getItem(SESSION_STORAGE_KEY);
+    if (token) {
+      try {
+        const cached = localStorage.getItem(`${USER_CACHE_PREFIX}${token.slice(-16)}`);
+        if (cached) return JSON.parse(cached) as UserProfile;
+      } catch {
+        // ignore cache parse error
+      }
+    }
+    return EMPTY_INITIAL_USER;
+  });
+
+  const updateAuthenticatedUser = useCallback(
+    (nextUser: UserProfile | ((prev: UserProfile) => UserProfile), tokenOverride?: string | null) => {
+      setUser((prev) => {
+        const resolved = typeof nextUser === 'function' ? nextUser(prev) : nextUser;
+        const activeToken = tokenOverride !== undefined ? tokenOverride : authToken;
+        if (activeToken && resolved && resolved.id !== 'usr-pending') {
+          try {
+            localStorage.setItem(
+              `${USER_CACHE_PREFIX}${activeToken.slice(-16)}`,
+              JSON.stringify(resolved)
+            );
+          } catch {
+            // ignore quota errors
+          }
+        }
+        return resolved;
+      });
+    },
+    [authToken]
+  );
 
   // Modals & Drawers
   const [addMaterialOpen, setAddMaterialOpen] = useState(false);
@@ -97,7 +130,7 @@ export default function App() {
 
   const handleDeleteMaterial = async (materialId: string) => {
     // Optimistically remove from UI immediately
-    setUser((prev) => ({
+    updateAuthenticatedUser((prev) => ({
       ...prev,
       materials: prev.materials.filter((m) => m.id !== materialId),
       revisionTopics: prev.revisionTopics.filter((r) => r.id !== `rev-${materialId}`),
@@ -113,7 +146,7 @@ export default function App() {
       });
       if (res.ok) {
         const data = await res.json();
-        if (data.user) setUser(data.user);
+        if (data.user) updateAuthenticatedUser(data.user);
       }
     } catch {
       // Keep optimistic state if offline
@@ -126,41 +159,70 @@ export default function App() {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
 
-  // Restore session from backend only if the user already signed in / signed up
-  useEffect(() => {
-    const restoreSession = async () => {
-      if (!authToken) {
-        setAppMode('signin');
-        return;
-      }
-      try {
-        const meRes = await fetch('/api/auth/me', {
-          headers: { Authorization: `Bearer ${authToken}` },
-        });
-        if (meRes.ok) {
-          const data = await meRes.json();
-          if (data.user) {
-            setUser(data.user);
-            return;
-          }
+  // Restore & synchronize session from backend across devices (on mount, tab focus, visibilitychange, and reconnect)
+  const syncSessionFromServer = useCallback(async () => {
+    if (!authToken) {
+      setAppMode((prev) => (prev === 'workspace' ? 'signin' : prev));
+      return;
+    }
+    try {
+      const meRes = await fetch('/api/auth/me', {
+        headers: { Authorization: `Bearer ${authToken}` },
+        cache: 'no-store',
+      });
+      if (meRes.ok) {
+        const data = await meRes.json();
+        if (data.user) {
+          updateAuthenticatedUser(data.user, authToken);
+          return;
         }
-        // If token is invalid/expired, return to Sign In
+      }
+      if (meRes.status === 401) {
         localStorage.removeItem(SESSION_STORAGE_KEY);
         setAuthToken(null);
+        setUser(EMPTY_INITIAL_USER);
         setAppMode('signin');
-      } catch {
-        // Keep current state if offline
+      }
+    } catch {
+      // Keep cached user state if temporarily offline
+    }
+  }, [authToken, updateAuthenticatedUser]);
+
+  useEffect(() => {
+    syncSessionFromServer();
+  }, [syncSessionFromServer]);
+
+  useEffect(() => {
+    if (!authToken) return;
+    const onFocusOrOnline = () => {
+      syncSessionFromServer();
+    };
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        syncSessionFromServer();
       }
     };
-    restoreSession();
-  }, [authToken]);
+    window.addEventListener('focus', onFocusOrOnline);
+    window.addEventListener('online', onFocusOrOnline);
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => {
+      window.removeEventListener('focus', onFocusOrOnline);
+      window.removeEventListener('online', onFocusOrOnline);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+    };
+  }, [authToken, syncSessionFromServer]);
 
-  // Keyboard shortcut Cmd+K / Ctrl+K
+  // Keyboard shortcuts Cmd+K / Ctrl+K and Escape to close search/modals
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setCmdKOpen((prev) => !prev);
+      } else if (e.key === 'Escape') {
+        setCmdKOpen(false);
+        setHeaderSearchFocused(false);
+        setNotificationsOpen(false);
+        setMobileMenuOpen(false);
       }
     };
     window.addEventListener('keydown', onKeyDown);
@@ -176,7 +238,7 @@ export default function App() {
   const handleAuthSuccess = (token: string, authedUser: UserProfile, isNewSignup?: boolean) => {
     localStorage.setItem(SESSION_STORAGE_KEY, token);
     setAuthToken(token);
-    setUser(authedUser);
+    updateAuthenticatedUser(authedUser, token);
     if (isNewSignup) {
       setAppMode('onboarding');
     } else {
@@ -190,8 +252,12 @@ export default function App() {
     } catch {
       // ignore
     }
+    if (authToken) {
+      localStorage.removeItem(`${USER_CACHE_PREFIX}${authToken.slice(-16)}`);
+    }
     localStorage.removeItem(SESSION_STORAGE_KEY);
     setAuthToken(null);
+    setUser(EMPTY_INITIAL_USER);
     setAppMode('signin');
   };
 
@@ -398,13 +464,13 @@ export default function App() {
          ========================================== */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Persistent Top Header Bar */}
-        <header className="sticky top-0 z-20 bg-[#F8FAFC]/95 backdrop-blur border-b border-[#E2E8F0]/80 px-4 sm:px-8 h-16 flex items-center justify-between gap-4">
+        <header className="sticky top-0 z-20 bg-[#F8FAFC]/95 backdrop-blur border-b border-[#E2E8F0]/80 px-3 sm:px-6 lg:px-8 min-h-16 py-2 flex items-center justify-between gap-2 sm:gap-4">
           {/* Mobile Menu Button + Brand + Search Bar */}
-          <div className="flex items-center gap-3 flex-1 max-w-xl">
+          <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0 max-w-xl">
             <button
               type="button"
               onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden p-2 rounded-xl bg-white border border-[#E2E8F0] text-[#0F172A] cursor-pointer"
+              className="lg:hidden p-2 rounded-xl bg-white border border-[#E2E8F0] text-[#0F172A] shrink-0 cursor-pointer"
               aria-label="Open navigation menu"
             >
               <Menu className="w-4 h-4" />
@@ -413,13 +479,15 @@ export default function App() {
               type="button"
               onClick={() => handleNavigate('dashboard')}
               className="lg:hidden shrink-0 cursor-pointer"
+              aria-label="Go to Dashboard"
             >
-              <NoteNestLogo size="xs" />
+              <NoteNestLogo size="xs" showWordmark={false} className="sm:hidden" />
+              <NoteNestLogo size="xs" className="hidden sm:inline-flex" />
             </button>
 
-            <div className="relative w-full">
-              <div className="w-full flex items-center justify-between px-3.5 py-2 bg-[#EFF4FF]/70 focus-within:bg-white border border-[#E2E8F0] focus-within:border-[#2563EB] rounded-xl text-xs text-[#0F172A] transition-all">
-                <span className="flex items-center gap-2.5 flex-1 min-w-0">
+            <div className="relative flex-1 min-w-0">
+              <div className="w-full flex items-center justify-between gap-1.5 px-2.5 sm:px-3.5 py-2 bg-[#EFF4FF]/70 focus-within:bg-white border border-[#E2E8F0] focus-within:border-[#2563EB] rounded-xl text-xs text-[#0F172A] transition-all">
+                <span className="flex items-center gap-2 flex-1 min-w-0">
                   <Search className="w-3.5 h-3.5 text-[#2563EB] shrink-0" />
                   <input
                     type="text"
@@ -429,25 +497,26 @@ export default function App() {
                       setCmdKQuery(e.target.value);
                       setHeaderSearchFocused(true);
                     }}
-                    placeholder="Search notes, PDFs, or subjects to view or summarize..."
-                    className="w-full bg-transparent text-xs text-[#0F172A] placeholder:text-[#64748B] focus:outline-none"
+                    placeholder="Search notes, PDFs, or subjects..."
+                    aria-label="Search notes, PDFs, or subjects"
+                    className="w-full min-w-0 bg-transparent text-xs text-[#0F172A] placeholder:text-[#64748B] focus:outline-none"
                   />
                 </span>
-                {cmdKQuery ? (
+                {(cmdKQuery || headerSearchFocused) && (
                   <button
                     type="button"
-                    onClick={() => setCmdKQuery('')}
-                    className="p-0.5 text-[#64748B] hover:text-[#0F172A] cursor-pointer"
+                    onClick={() => {
+                      if (cmdKQuery) {
+                        setCmdKQuery('');
+                      } else {
+                        setHeaderSearchFocused(false);
+                      }
+                    }}
+                    aria-label={cmdKQuery ? 'Clear search query' : 'Close search'}
+                    title={cmdKQuery ? 'Clear search' : 'Close search'}
+                    className="p-1 rounded-lg text-[#64748B] hover:text-[#0F172A] hover:bg-[#F1F5F9] shrink-0 cursor-pointer"
                   >
                     <X className="w-3.5 h-3.5" />
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => setCmdKOpen(true)}
-                    className="px-1.5 py-0.5 text-[10px] font-semibold text-[#64748B] bg-white border border-[#E2E8F0] rounded shadow-2xs shrink-0 cursor-pointer"
-                  >
-                    ⌘K
                   </button>
                 )}
               </div>
@@ -459,7 +528,7 @@ export default function App() {
                     className="fixed inset-0 z-30"
                     onClick={() => setHeaderSearchFocused(false)}
                   />
-                  <div className="absolute left-0 right-0 mt-2 bg-white border border-[#E2E8F0] rounded-2xl shadow-xl p-3 z-40 space-y-2 max-h-96 overflow-y-auto">
+                  <div className="fixed sm:absolute left-3 right-3 sm:left-0 sm:right-0 top-16 sm:top-auto sm:mt-2 bg-white border border-[#E2E8F0] rounded-2xl shadow-xl p-3 z-40 space-y-2 max-h-[75dvh] sm:max-h-96 overflow-y-auto">
                     <div className="flex items-center justify-between px-2 py-1 border-b border-[#E2E8F0]">
                       <span className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider">
                         {cmdKQuery.trim()
@@ -469,9 +538,10 @@ export default function App() {
                       <button
                         type="button"
                         onClick={() => setHeaderSearchFocused(false)}
-                        className="text-[11px] text-[#64748B] hover:text-[#0F172A] cursor-pointer"
+                        aria-label="Close search results"
+                        className="p-1 rounded-lg text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC] flex items-center gap-1 text-[11px] font-medium cursor-pointer"
                       >
-                        Close
+                        <X className="w-3.5 h-3.5" />
                       </button>
                     </div>
 
@@ -504,14 +574,14 @@ export default function App() {
                                 </p>
                               </div>
                             </button>
-                            <div className="flex items-center gap-1.5 shrink-0">
+                            <div className="flex flex-wrap items-center gap-1.5 shrink-0">
                               <button
                                 type="button"
                                 onClick={() => {
                                   setHeaderSearchFocused(false);
                                   setViewingMaterial(m);
                                 }}
-                                className="px-2.5 py-1 rounded-lg bg-white hover:bg-[#EFF4FF] border border-[#CBD5E1] text-[#0F172A] text-[11px] font-semibold flex items-center gap-1 cursor-pointer"
+                                className="px-2.5 py-1.5 rounded-lg bg-white hover:bg-[#EFF4FF] border border-[#CBD5E1] text-[#0F172A] text-[11px] font-semibold flex items-center gap-1 cursor-pointer"
                               >
                                 <Eye className="w-3 h-3 text-[#2563EB]" />
                                 View Document
@@ -523,7 +593,7 @@ export default function App() {
                                   setSelectedAiMaterialId(m.id);
                                   handleNavigate('ai-assistant');
                                 }}
-                                className="px-2.5 py-1 rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-[11px] font-semibold flex items-center gap-1 cursor-pointer"
+                                className="px-2.5 py-1.5 rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-[11px] font-semibold flex items-center gap-1 cursor-pointer"
                               >
                                 <Sparkles className="w-3 h-3" />
                                 Summarize
@@ -533,6 +603,7 @@ export default function App() {
                                 onClick={() => handleDeleteMaterial(m.id)}
                                 className="p-1.5 rounded-lg bg-white hover:bg-[#FEF2F2] border border-[#E2E8F0] text-[#DC2626] cursor-pointer"
                                 title="Delete document"
+                                aria-label={`Delete ${m.title}`}
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
@@ -547,15 +618,16 @@ export default function App() {
             </div>
           </div>
 
-          {/* Right Header Controls: + Upload Material, Bell, Profile */}
-          <div className="flex items-center gap-3 shrink-0">
+          {/* Right Header Controls: Upload Material, Bell, Profile */}
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <button
               type="button"
               onClick={() => setAddMaterialOpen(true)}
-              className="px-4 py-2 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-semibold flex items-center gap-1.5 font-display transition-colors whitespace-nowrap shadow-2xs cursor-pointer"
+              className="px-2.5 sm:px-4 py-2 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-semibold flex items-center gap-1.5 font-display transition-colors whitespace-nowrap shadow-2xs cursor-pointer"
             >
-              <Plus className="w-4 h-4" />
-              <span>+ Upload Document</span>
+              <Plus className="w-4 h-4 shrink-0" />
+              <span className="hidden sm:inline">Upload Document</span>
+              <span className="sm:hidden">Upload</span>
             </button>
 
             <div className="relative">
@@ -570,7 +642,7 @@ export default function App() {
               </button>
 
               {notificationsOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white border border-[#E2E8F0] rounded-2xl p-4 shadow-xl space-y-3 z-50">
+                <div className="fixed sm:absolute right-3 sm:right-0 top-16 sm:top-auto sm:mt-2 w-[calc(100vw-1.5rem)] max-w-80 bg-white border border-[#E2E8F0] rounded-2xl p-4 shadow-xl space-y-3 z-50">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-[#0F172A] font-display">
                       Study Notifications
@@ -578,9 +650,10 @@ export default function App() {
                     <button
                       type="button"
                       onClick={() => setNotificationsOpen(false)}
-                      className="text-[11px] text-[#64748B] hover:text-[#0F172A] cursor-pointer"
+                      aria-label="Close notifications"
+                      className="p-1 rounded-lg text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC] cursor-pointer"
                     >
-                      Close
+                      <X className="w-3.5 h-3.5" />
                     </button>
                   </div>
                   <div className="p-3 rounded-xl bg-[#EFF4FF] border border-[#DBEAFE] text-xs space-y-1">
@@ -599,7 +672,7 @@ export default function App() {
             <button
               type="button"
               onClick={() => handleNavigate('settings')}
-              className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white hover:bg-[#EFF4FF] border border-[#E2E8F0] cursor-pointer"
+              className="flex items-center gap-2 px-2 sm:px-2.5 py-1.5 rounded-xl bg-white hover:bg-[#EFF4FF] border border-[#E2E8F0] cursor-pointer"
               title={`${user.name} (${user.email})`}
             >
               {user.avatarUrl ? (
@@ -609,7 +682,7 @@ export default function App() {
                   className="w-6 h-6 rounded-full object-cover border border-[#2563EB] shrink-0"
                 />
               ) : (
-                <div className="w-6 h-6 rounded-full bg-[#2563EB] text-white font-bold text-[10px] flex items-center justify-center font-display">
+                <div className="w-6 h-6 rounded-full bg-[#2563EB] text-white font-bold text-[10px] flex items-center justify-center font-display shrink-0">
                   {userInitials}
                 </div>
               )}
@@ -668,7 +741,7 @@ export default function App() {
               initialMaterialId={selectedAiMaterialId}
               onNavigate={handleNavigate}
               onOpenAddMaterial={() => handleOpenAddMaterial()}
-              onUserUpdated={setUser}
+              onUserUpdated={updateAuthenticatedUser}
               onViewMaterial={(mat) => setViewingMaterial(mat)}
               onDeleteMaterial={handleDeleteMaterial}
             />
@@ -680,7 +753,7 @@ export default function App() {
               authToken={authToken}
               onNavigate={handleNavigate}
               onOpenAddMaterial={() => handleOpenAddMaterial()}
-              onUserUpdated={setUser}
+              onUserUpdated={updateAuthenticatedUser}
             />
           )}
 
@@ -689,7 +762,7 @@ export default function App() {
               user={user}
               authToken={authToken}
               initialTopicId={selectedRevisionTopicId}
-              onUserUpdated={setUser}
+              onUserUpdated={updateAuthenticatedUser}
               onNavigate={handleNavigate}
               onOpenAddMaterial={() => handleOpenAddMaterial()}
             />
@@ -708,7 +781,7 @@ export default function App() {
               user={user}
               authToken={authToken}
               avatarUrl={user.avatarUrl || null}
-              onUserUpdated={setUser}
+              onUserUpdated={updateAuthenticatedUser}
               onSignOut={handleSignOut}
               onOpenAddMaterialForSubject={handleOpenAddMaterial}
               onSummariseMaterial={(mat) => {
@@ -726,15 +799,22 @@ export default function App() {
           MOBILE SLIDE-OVER NAVIGATION DRAWER
          ========================================== */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden bg-[#0F172A]/40 backdrop-blur-xs flex">
-          <div className="w-72 bg-white h-full p-5 flex flex-col justify-between shadow-xl">
+        <div
+          className="fixed inset-0 z-50 lg:hidden bg-[#0F172A]/40 backdrop-blur-xs flex"
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          <div
+            className="w-[85vw] max-w-72 bg-white h-full p-5 flex flex-col justify-between shadow-xl overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <NoteNestLogo size="sm" />
                 <button
                   type="button"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="p-1.5 text-[#64748B]"
+                  aria-label="Close navigation menu"
+                  className="p-2 rounded-xl text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC] cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -749,13 +829,13 @@ export default function App() {
                       key={item.id}
                       type="button"
                       onClick={() => handleNavigate(item.id)}
-                      className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium ${
+                      className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium cursor-pointer ${
                         active
                           ? 'bg-[#DBEAFE] text-[#2563EB] font-semibold'
-                          : 'text-[#434655]'
+                          : 'text-[#434655] hover:bg-[#F8FAFC]'
                       }`}
                     >
-                      <IconComp className="w-4 h-4" />
+                      <IconComp className="w-4 h-4 shrink-0" />
                       <span>{item.label}</span>
                     </button>
                   );
@@ -763,12 +843,57 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => handleNavigate('settings')}
-                  className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-[#434655]"
+                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium cursor-pointer ${
+                    activeNav === 'settings'
+                      ? 'bg-[#DBEAFE] text-[#2563EB] font-semibold'
+                      : 'text-[#434655] hover:bg-[#F8FAFC]'
+                  }`}
                 >
-                  <Settings className="w-4 h-4" />
+                  <Settings className="w-4 h-4 shrink-0" />
                   <span>My Profile &amp; Subjects</span>
                 </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setHelpOpen(true);
+                  }}
+                  className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-[#434655] hover:bg-[#F8FAFC] cursor-pointer"
+                >
+                  <HelpCircle className="w-4 h-4 shrink-0 text-[#64748B]" />
+                  <span>Help &amp; Support</span>
+                </button>
               </nav>
+
+              {user.subjects.length > 0 && (
+                <div className="pt-3 border-t border-[#E2E8F0] space-y-2">
+                  <div className="flex items-center justify-between px-1">
+                    <span className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider flex items-center gap-1">
+                      <BookOpen className="w-3 h-3 text-[#2563EB]" />
+                      My Subjects ({user.subjects.length})
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleNavigate('settings')}
+                      className="text-[10px] font-semibold text-[#2563EB] hover:underline cursor-pointer"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {user.subjects.map((subj) => (
+                      <button
+                        key={subj}
+                        type="button"
+                        onClick={() => handleNavigate('knowledge')}
+                        className="px-2.5 py-1 rounded-lg bg-[#F8FAFC] hover:bg-[#EFF4FF] border border-[#E2E8F0] text-[11px] font-medium text-[#0F172A] truncate max-w-full cursor-pointer"
+                      >
+                        {subj}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="space-y-3 pt-4 border-t border-[#E2E8F0]">
@@ -792,24 +917,48 @@ export default function App() {
           CMD+K SEMANTIC SEARCH MODAL
          ========================================== */}
       {cmdKOpen && (
-        <div className="fixed inset-0 z-50 bg-[#0F172A]/40 backdrop-blur-xs flex items-start justify-center pt-20 p-4">
-          <div className="bg-white border border-[#E2E8F0] rounded-2xl max-w-2xl w-full p-4 shadow-xl space-y-4">
-            <div className="flex items-center gap-3 border-b border-[#E2E8F0] pb-3">
-              <Search className="w-4 h-4 text-[#2563EB]" />
+        <div
+          className="fixed inset-0 z-50 bg-[#0F172A]/40 backdrop-blur-xs flex items-start justify-center pt-12 sm:pt-20 p-3 sm:p-4"
+          onClick={() => setCmdKOpen(false)}
+        >
+          <div
+            className="bg-white border border-[#E2E8F0] rounded-2xl max-w-2xl w-full p-4 shadow-xl space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-2.5 border-b border-[#E2E8F0] pb-3">
+              <button
+                type="button"
+                onClick={() => setCmdKOpen(false)}
+                aria-label="Back to workspace"
+                title="Back"
+                className="p-1.5 rounded-lg text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC] shrink-0 cursor-pointer"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </button>
+              <Search className="w-4 h-4 text-[#2563EB] shrink-0" />
               <input
                 type="text"
                 autoFocus
                 value={cmdKQuery}
                 onChange={(e) => setCmdKQuery(e.target.value)}
-                placeholder="Search across your documents, subjects, or concepts to view or summarize..."
-                className="w-full text-sm text-[#0F172A] focus:outline-none"
+                placeholder="Search across your documents, subjects, or concepts..."
+                aria-label="Search across your documents, subjects, or concepts"
+                className="w-full min-w-0 text-sm text-[#0F172A] focus:outline-none"
               />
               <button
                 type="button"
-                onClick={() => setCmdKOpen(false)}
-                className="text-xs text-[#64748B] hover:text-[#0F172A] cursor-pointer"
+                onClick={() => {
+                  if (cmdKQuery) {
+                    setCmdKQuery('');
+                  } else {
+                    setCmdKOpen(false);
+                  }
+                }}
+                aria-label={cmdKQuery ? 'Clear search input' : 'Close search'}
+                title={cmdKQuery ? 'Clear search' : 'Close search'}
+                className="p-1.5 rounded-lg text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC] shrink-0 cursor-pointer"
               >
-                ESC
+                <X className="w-4 h-4" />
               </button>
             </div>
 
@@ -896,10 +1045,10 @@ export default function App() {
           GLOBAL DOCUMENT VIEWER MODAL
          ========================================== */}
       {viewingMaterial && (
-        <div className="fixed inset-0 z-50 bg-[#0F172A]/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white border border-[#E2E8F0] rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+        <div className="fixed inset-0 z-50 bg-[#0F172A]/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white border border-[#E2E8F0] rounded-2xl max-w-4xl w-full max-h-[90dvh] flex flex-col shadow-2xl overflow-hidden">
             {/* Header */}
-            <div className="px-6 py-4 bg-[#F8FAFC] border-b border-[#E2E8F0] flex flex-wrap items-center justify-between gap-3">
+            <div className="px-4 sm:px-6 py-4 bg-[#F8FAFC] border-b border-[#E2E8F0] flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-10 h-10 rounded-xl bg-[#DBEAFE] text-[#2563EB] flex items-center justify-center shrink-0">
                   <FileText className="w-5 h-5" />
@@ -919,7 +1068,7 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   onClick={() => {
@@ -944,6 +1093,7 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => setViewingMaterial(null)}
+                  aria-label="Close document viewer"
                   className="p-2 rounded-xl bg-white hover:bg-[#F1F5F9] border border-[#E2E8F0] text-[#434655] cursor-pointer"
                 >
                   <X className="w-4 h-4" />
@@ -952,7 +1102,7 @@ export default function App() {
             </div>
 
             {/* Body */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-5">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
               {/* If actual PDF data URL was uploaded, show embedded PDF viewer first */}
               {viewingMaterial.fileDataUrl &&
                 viewingMaterial.fileDataUrl.startsWith('data:application/pdf') && (
@@ -963,14 +1113,14 @@ export default function App() {
                     <iframe
                       src={viewingMaterial.fileDataUrl}
                       title={viewingMaterial.title}
-                      className="w-full h-[420px] rounded-xl border border-[#E2E8F0] bg-[#F8FAFC]"
+                      className="w-full h-[260px] sm:h-[420px] rounded-xl border border-[#E2E8F0] bg-[#F8FAFC]"
                     />
                   </div>
                 )}
 
               {/* Full Document Content & Extracted Text */}
-              <div className="p-5 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-3">
-                <div className="flex items-center justify-between">
+              <div className="p-4 sm:p-5 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="text-[11px] font-bold uppercase tracking-wider text-[#004AC6]">
                     Document Content &amp; Extracted Study Notes
                   </span>
@@ -987,7 +1137,8 @@ export default function App() {
               {viewingMaterial.excerptText && (
                 <div className="p-4 rounded-xl bg-[#EFF4FF] border-l-4 border-[#2563EB] space-y-1">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#2563EB]">
-                    Key Document Passage ({viewingMaterial.excerptSection || '§ 1.1'})
+                    Key Document Passage{' '}
+                    {viewingMaterial.excerptSection ? `(${viewingMaterial.excerptSection})` : ''}
                   </span>
                   <p className="text-xs text-[#0F172A] leading-relaxed italic">
                     {viewingMaterial.excerptText}
@@ -1014,8 +1165,8 @@ export default function App() {
 
               {/* If AI Summary is available, show a quick preview of Key Takeaways */}
               {viewingMaterial.aiSummary && (
-                <div className="p-5 rounded-2xl bg-white border border-[#DBEAFE] space-y-3">
-                  <div className="flex items-center justify-between">
+                <div className="p-4 sm:p-5 rounded-2xl bg-white border border-[#DBEAFE] space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="text-xs font-bold text-[#004AC6] flex items-center gap-1.5">
                       <Sparkles className="w-4 h-4 text-[#2563EB]" />
                       AI Topic Summary Highlights
@@ -1028,9 +1179,10 @@ export default function App() {
                         setSelectedAiMaterialId(targetId);
                         handleNavigate('ai-assistant');
                       }}
-                      className="text-xs font-semibold text-[#2563EB] hover:underline cursor-pointer"
+                      className="text-xs font-semibold text-[#2563EB] hover:underline inline-flex items-center gap-1 cursor-pointer"
                     >
-                      Open Full AI Summary Studio →
+                      <span>Open Full AI Summary Studio</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
                   <p className="text-xs text-[#334155] leading-relaxed">
@@ -1115,7 +1267,7 @@ export default function App() {
           setAddMaterialOpen(false);
           setAddMaterialSubject(undefined);
         }}
-        onMaterialAdded={(updatedUser) => setUser(updatedUser)}
+        onMaterialAdded={(updatedUser) => updateAuthenticatedUser(updatedUser)}
         onNavigateToAiSection={(materialId) => {
           if (materialId) setSelectedAiMaterialId(materialId);
           handleNavigate('ai-assistant');
@@ -1128,7 +1280,7 @@ export default function App() {
         authToken={authToken}
         onClose={() => setAiSummaryMaterial(null)}
         onUserUpdated={(updatedUser) => {
-          setUser(updatedUser);
+          updateAuthenticatedUser(updatedUser);
           if (aiSummaryMaterial) {
             const refreshed = updatedUser.materials.find((m) => m.id === aiSummaryMaterial.id);
             if (refreshed) setAiSummaryMaterial(refreshed);

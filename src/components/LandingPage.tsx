@@ -13,6 +13,8 @@ import {
   ShieldCheck,
   Check,
   Play,
+  Menu,
+  X,
 } from 'lucide-react';
 import { NoteNestLogo } from './NoteNestLogo';
 
@@ -29,15 +31,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 }) => {
   const [selectedDemoOption, setSelectedDemoOption] = useState<'A' | 'B' | 'C'>('B');
   const [demoSubmitted, setDemoSubmitted] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] flex flex-col">
       {/* 3-Zone Top Bar Contract */}
-      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-[#E2E8F0] px-6 lg:px-12 h-16 flex items-center justify-between">
+      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-[#E2E8F0] px-4 sm:px-6 lg:px-12 min-h-16 flex items-center justify-between gap-3">
         {/* Zone 1: Brand Logo & Wordmark */}
         <a
           href="#top"
-          className="inline-flex items-center whitespace-nowrap"
+          className="inline-flex items-center whitespace-nowrap shrink-0"
         >
           <NoteNestLogo size="sm" />
         </a>
@@ -58,25 +61,67 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </a>
         </nav>
 
-        {/* Zone 3: 2 primary actions */}
-        <div className="flex items-center gap-3">
+        {/* Zone 3: 2 primary actions + Mobile Hamburger Menu */}
+        <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={onNavigateSignIn}
-            className="px-4 py-2 text-sm font-semibold text-[#0F172A] hover:text-[#2563EB] transition-colors font-display whitespace-nowrap cursor-pointer"
+            className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-[#0F172A] hover:text-[#2563EB] transition-colors font-display whitespace-nowrap cursor-pointer"
           >
             Log in
           </button>
           <button
             onClick={onNavigateSignUp}
-            className="px-4 py-2 text-sm font-semibold text-white bg-[#2563EB] hover:bg-[#1D4ED8] rounded-lg transition-all font-display whitespace-nowrap cursor-pointer"
+            className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-white bg-[#2563EB] hover:bg-[#1D4ED8] rounded-lg transition-all font-display whitespace-nowrap cursor-pointer"
           >
             Get Started
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobileNavOpen(!mobileNavOpen)}
+            aria-label={mobileNavOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            className="md:hidden p-2 rounded-lg border border-[#E2E8F0] text-[#0F172A] hover:bg-[#F8FAFC] cursor-pointer"
+          >
+            {mobileNavOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </button>
         </div>
       </header>
 
+      {/* Mobile Navigation Drawer on Landing Page */}
+      {mobileNavOpen && (
+        <div className="md:hidden bg-white border-b border-[#E2E8F0] px-4 py-3 space-y-2 shadow-xs">
+          <a
+            href="#features"
+            onClick={() => setMobileNavOpen(false)}
+            className="block px-3 py-2 rounded-lg text-sm font-medium text-[#0F172A] hover:bg-[#F8FAFC]"
+          >
+            Features
+          </a>
+          <a
+            href="#how-it-works"
+            onClick={() => setMobileNavOpen(false)}
+            className="block px-3 py-2 rounded-lg text-sm font-medium text-[#0F172A] hover:bg-[#F8FAFC]"
+          >
+            How It Works
+          </a>
+          <a
+            href="#ai-learning"
+            onClick={() => setMobileNavOpen(false)}
+            className="block px-3 py-2 rounded-lg text-sm font-medium text-[#0F172A] hover:bg-[#F8FAFC]"
+          >
+            AI Learning
+          </a>
+          <a
+            href="#active-recall"
+            onClick={() => setMobileNavOpen(false)}
+            className="block px-3 py-2 rounded-lg text-sm font-medium text-[#0F172A] hover:bg-[#F8FAFC]"
+          >
+            Active Recall
+          </a>
+        </div>
+      )}
+
       {/* Hero Section */}
-      <section id="top" className="max-w-7xl mx-auto px-6 lg:px-12 pt-16 pb-20 w-full">
+      <section id="top" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 pt-10 sm:pt-16 pb-14 sm:pb-20 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-6 space-y-6">
             <p className="text-sm font-medium text-[#2563EB] tracking-normal">
@@ -136,7 +181,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </span>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="p-3 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0]">
                   <p className="text-xs text-[#64748B]">Indexed Sources</p>
                   <p className="text-xl font-bold text-[#0F172A] font-display tabular-nums mt-0.5">
@@ -314,7 +359,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       <section id="how-it-works" className="bg-white border-y border-[#E2E8F0] py-16">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <h2 className="text-2xl sm:text-3xl font-bold text-[#0F172A] font-display mb-8">
-            How NoteNest Works: Collect → Understand → Practice → Remember
+            How NoteNest Works: Collect, Understand, Practice &amp; Remember
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
@@ -383,8 +428,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   younger transactions holding locks.
                 </li>
               </ul>
-              <div className="pt-2 border-t border-[#E2E8F0] flex items-center gap-3 text-xs text-[#2563EB] font-medium">
-                <span>Cited: OS Unit 4.pdf · p. 19 § 4.3</span>
+              <div className="pt-2 border-t border-[#E2E8F0] flex flex-wrap items-center gap-3 text-xs text-[#2563EB] font-medium">
+                <span>Cited: OS Unit 4.pdf · p. 19, Sec 4.3</span>
                 <span aria-hidden="true">·</span>
                 <span>Class Notes.pdf · p. 4</span>
               </div>
@@ -460,12 +505,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               })}
             </div>
 
-            <div className="flex items-center justify-between pt-2">
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
               {demoSubmitted ? (
-                <p className="text-xs font-medium text-[#10B981]">
-                  {selectedDemoOption === 'B'
-                    ? '✓ Correct! Cited from DBMS Unit 3.pdf (p. 14).'
-                    : 'Option B is correct — only non-conflicting pairs can be swapped.'}
+                <p className="text-xs font-medium text-[#10B981] flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                  <span>
+                    {selectedDemoOption === 'B'
+                      ? 'Correct! Cited from DBMS Unit 3.pdf (p. 14).'
+                      : 'Option B is correct — only non-conflicting pairs can be swapped.'}
+                  </span>
                 </p>
               ) : (
                 <span className="text-xs text-[#64748B]">

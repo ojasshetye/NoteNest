@@ -684,22 +684,27 @@ export interface StudyMaterial {
   fileName: string;
   fileSize?: string;
   subject: string;
-  subjectCode: string;
-  fileType: 'PDF' | 'PPTX' | 'Notes' | 'Markdown Doc';
+  subjectCode?: string;
+  unit?: string;
+  type?: string;
+  uploadedAt?: string;
+  masteryPct?: number;
+  summarySnippet?: string;
+  fileType?: 'PDF' | 'PPTX' | 'Notes' | 'Markdown Doc';
   pagesOrSlides: string;
-  pageCount: number;
-  conceptsCount: number;
-  updatedAt: string;
-  authorNote: string;
+  pageCount?: number;
+  conceptsCount?: number;
+  updatedAt?: string;
+  authorNote?: string;
   recallProgress: number;
   statusBadge?: 'Mastered' | 'Needs Review' | 'Primary' | null;
   keyConcepts: string[];
-  actionLabel: string;
-  actionType: 'quiz' | 'review' | 'practice' | 'drill';
-  questionCount: number;
-  activeInAiScope: boolean;
-  excerptPage: number;
-  excerptSection: string;
+  actionLabel?: string;
+  actionType?: 'quiz' | 'review' | 'practice' | 'drill';
+  questionCount?: number;
+  activeInAiScope?: boolean;
+  excerptPage?: number;
+  excerptSection?: string;
   excerptText: string;
   fullSummary: string;
   rawContent?: string;
@@ -1216,17 +1221,27 @@ async function startServer() {
   // Ensure DB is initialized
   loadDatabase();
 
-  // Auth Middleware — resolves token if valid, or falls back to active workspace user so uploads/AI never fail with 401
+  // Auth Middleware — resolves the authenticated user's account from the Bearer token
   const requireAuth = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
     const token =
       authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : null;
     const payload = token && token !== 'null' && token !== 'undefined' ? verifyToken(token) : null;
     const db = loadDatabase();
-    let user = payload ? db.users.find((u) => u.id === payload.userId) : undefined;
-    if (!user && db.users.length > 0) {
-      user = db.users[db.users.length - 1];
+    let user = payload
+      ? db.users.find(
+          (u) =>
+            u.id === payload.userId ||
+            (payload.email && u.email.toLowerCase() === payload.email.toLowerCase())
+        )
+      : undefined;
+
+    // Only allow fallback to demo user on stateless AI helper routes when no token is provided
+    const isStatelessAiRoute = req.path.startsWith('/api/ai/');
+    if (!user && !token && isStatelessAiRoute && db.users.length > 0) {
+      user = db.users[0];
     }
+
     if (!user) {
       res.status(401).json({ error: 'Authentication required. Please sign in to your NoteNest account.' });
       return;
@@ -3079,6 +3094,7 @@ Instructions:
               uploadedAt: 'Active Session',
               pagesOrSlides: 'AI Tutor Knowledge Base',
               masteryPct: 100,
+              recallProgress: 100,
               keyConcepts: extractKeyConceptsFromText(
                 `${question || ''} ${customContextText || ''}`,
                 String(question || fallbackSubject),

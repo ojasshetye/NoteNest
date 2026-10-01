@@ -17,6 +17,8 @@ import {
   FolderOpen,
   Eye,
   Trash2,
+  X,
+  ArrowRight,
 } from 'lucide-react';
 import { NavSection, StudyMaterial, UserProfile } from '../types';
 
@@ -139,10 +141,12 @@ export const MyKnowledgeView: React.FC<MyKnowledgeViewProps> = ({
             }
             className="px-4 py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-semibold flex items-center gap-1.5 font-display cursor-pointer shadow-xs"
           >
-            <Plus className="w-4 h-4" />
-            {selectedSubject !== 'ALL'
-              ? `+ Add Document to ${selectedSubject}`
-              : '+ Add New Document'}
+            <Plus className="w-4 h-4 shrink-0" />
+            <span>
+              {selectedSubject !== 'ALL'
+                ? `Add Document to ${selectedSubject}`
+                : 'Add New Document'}
+            </span>
           </button>
         </div>
       </div>
@@ -233,25 +237,44 @@ export const MyKnowledgeView: React.FC<MyKnowledgeViewProps> = ({
                   }
                   className="px-4 py-2 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-semibold flex items-center gap-1.5 font-display cursor-pointer"
                 >
-                  <Plus className="w-3.5 h-3.5" />
-                  {selectedSubject !== 'ALL'
-                    ? `+ Add Document to ${selectedSubject}`
-                    : '+ Add New Document'}
+                  <Plus className="w-3.5 h-3.5 shrink-0" />
+                  <span>
+                    {selectedSubject !== 'ALL'
+                      ? `Add Document to ${selectedSubject}`
+                      : 'Add New Document'}
+                  </span>
                 </button>
               </div>
             </div>
 
             {/* Search & View Mode Controls */}
             <div className="bg-white border border-[#E2E8F0] rounded-2xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="relative flex-1">
-                <Search className="w-4 h-4 text-[#64748B] absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <div className="relative flex-1 min-w-0">
+                <Search className="w-4 h-4 text-[#64748B] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape' && searchQuery) {
+                      setSearchQuery('');
+                    }
+                  }}
                   placeholder="Search your uploaded documents by title, subject, or concept..."
-                  className="w-full pl-10 pr-4 py-2 text-xs bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl focus:outline-none focus:bg-white focus:border-[#2563EB]"
+                  aria-label="Search uploaded documents"
+                  className="w-full pl-10 pr-9 py-2 text-xs bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl focus:outline-none focus:bg-white focus:border-[#2563EB]"
                 />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    aria-label="Clear document search"
+                    title="Clear search"
+                    className="p-1 rounded-lg text-[#64748B] hover:text-[#0F172A] hover:bg-[#E2E8F0]/50 absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
 
               <div className="flex items-center gap-1.5 self-end sm:self-center">
@@ -317,10 +340,12 @@ export const MyKnowledgeView: React.FC<MyKnowledgeViewProps> = ({
                     }
                     className="px-5 py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-semibold inline-flex items-center gap-2 font-display cursor-pointer"
                   >
-                    <UploadCloud className="w-4 h-4" />
-                    {selectedSubject !== 'ALL'
-                      ? `+ Add Document to ${selectedSubject}`
-                      : '+ Add New Document'}
+                    <UploadCloud className="w-4 h-4 shrink-0" />
+                    <span>
+                      {selectedSubject !== 'ALL'
+                        ? `Add Document to ${selectedSubject}`
+                        : 'Add New Document'}
+                    </span>
                   </button>
                 </div>
               </div>
@@ -434,8 +459,8 @@ export const MyKnowledgeView: React.FC<MyKnowledgeViewProps> = ({
                 onClick={() => onOpenAddMaterial()}
                 className="px-5 py-2.5 rounded-xl bg-[#2563EB] text-white text-xs font-semibold inline-flex items-center gap-2 font-display cursor-pointer"
               >
-                <Plus className="w-4 h-4" />
-                + Upload Document
+                <Plus className="w-4 h-4 shrink-0" />
+                <span>Upload Document</span>
               </button>
             </div>
           ) : (
@@ -502,9 +527,10 @@ export const MyKnowledgeView: React.FC<MyKnowledgeViewProps> = ({
               <button
                 type="button"
                 onClick={() => setInspectMaterial(null)}
-                className="text-xs font-semibold text-[#64748B] hover:text-[#0F172A] cursor-pointer"
+                aria-label="Close document details"
+                className="p-1.5 rounded-lg text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC] cursor-pointer"
               >
-                Close ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 
@@ -552,8 +578,9 @@ export const MyKnowledgeView: React.FC<MyKnowledgeViewProps> = ({
                 }}
                 className="px-5 py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-semibold flex items-center gap-2 font-display cursor-pointer"
               >
-                <Sparkles className="w-3.5 h-3.5" />
-                Summarize in AI Section →
+                <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                <span>Summarize in AI Section</span>
+                <ArrowRight className="w-3.5 h-3.5 shrink-0" />
               </button>
             </div>
           </div>

@@ -31,7 +31,7 @@ export interface StudyMaterial {
   fileType?: 'PDF' | 'PPTX' | 'Notes' | 'Markdown Doc';
   pagesOrSlides: string;
   pageCount?: number;
-  conceptsCount?: number;
+  conceptsCount: number;
   updatedAt?: string;
   authorNote?: string;
   recallProgress: number;
@@ -134,9 +134,9 @@ export interface QuizQuestion {
   }[];
   correctLetter: 'A' | 'B' | 'C' | 'D';
   explanation: string;
-  sourceRef: string;
+  sourceRef?: string;
   sourceCitation?: string;
-  sourceExcerpt: string;
+  sourceExcerpt?: string;
 }
 
 export interface ConceptNode {

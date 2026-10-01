@@ -7,6 +7,7 @@ import {
   UploadCloud,
   HelpCircle,
   BookOpen,
+  ArrowRight,
 } from 'lucide-react';
 import { NavSection, QuizQuestion, StudyMaterial, UserProfile } from '../types';
 import { DBMS_QUIZ_QUESTIONS } from '../data/mockQuizAndConcepts';
@@ -15,6 +16,7 @@ interface QuizzesViewProps {
   user: UserProfile;
   authToken: string | null;
   onNavigate: (section: NavSection) => void;
+  onOpenAddMaterial?: () => void;
   onUserUpdated: (user: UserProfile) => void;
 }
 
@@ -32,6 +34,7 @@ function buildQuestionsFromMaterial(material: StudyMaterial): QuizQuestion[] {
       qList.push({
         id: idx + 1,
         topicTag: `${material.subject} · ${material.title}`,
+        typeLabel: 'Active Recall',
         difficulty: idx === 0 ? 'Medium Level' : 'Exam Level',
         prompt: qa.question,
         correctLetter: 'B',
@@ -65,6 +68,7 @@ function buildQuestionsFromMaterial(material: StudyMaterial): QuizQuestion[] {
         qList.push({
           id: qList.length + 1,
           topicTag: `${material.subject} · Definitions`,
+          typeLabel: 'Concept Check',
           difficulty: 'Medium Level',
           prompt: `In the context of "${material.title}" (${material.subject}), which statement accurately defines ${def.term}?`,
           correctLetter: 'A',
@@ -101,6 +105,7 @@ function buildQuestionsFromMaterial(material: StudyMaterial): QuizQuestion[] {
       {
         id: 1,
         topicTag: `${material.subject} · ${material.title}`,
+        typeLabel: 'Core Concept',
         difficulty: 'Medium Level',
         prompt: `What is the primary focus and core conceptual framework covered in "${material.title}" (${material.subject})?`,
         correctLetter: 'B',
@@ -133,6 +138,7 @@ function buildQuestionsFromMaterial(material: StudyMaterial): QuizQuestion[] {
       {
         id: 2,
         topicTag: `${material.subject} · Core Concepts`,
+        typeLabel: 'Source Check',
         difficulty: 'Medium Level',
         prompt: `Which of the following key concepts is directly indexed in your study document "${material.fileName}"?`,
         correctLetter: 'A',
@@ -345,9 +351,10 @@ export const QuizzesView: React.FC<QuizzesViewProps> = ({
             <button
               type="button"
               onClick={() => onNavigate('progress')}
-              className="px-6 py-2.5 rounded-xl bg-[#2563EB] text-white text-xs font-semibold font-display cursor-pointer"
+              className="px-6 py-2.5 rounded-xl bg-[#2563EB] text-white text-xs font-semibold font-display inline-flex items-center gap-1.5 cursor-pointer"
             >
-              View Progress →
+              <span>View Progress</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
@@ -380,8 +387,8 @@ export const QuizzesView: React.FC<QuizzesViewProps> = ({
       </div>
 
       {/* Question Card */}
-      <div className="bg-white border border-[#E2E8F0] rounded-3xl p-6 sm:p-8 space-y-6">
-        <div className="flex items-center justify-between text-xs">
+      <div className="bg-white border border-[#E2E8F0] rounded-3xl p-5 sm:p-8 space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
           <span className="px-3 py-1 rounded-full bg-[#EFF4FF] text-[#2563EB] font-semibold">
             {currentQuestion.topicTag}
           </span>
@@ -492,9 +499,10 @@ export const QuizzesView: React.FC<QuizzesViewProps> = ({
                   setCurrentIndex((prev) => prev + 1);
                   setSocraticClue(null);
                 }}
-                className="px-6 py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-semibold font-display cursor-pointer"
+                className="px-6 py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-semibold font-display inline-flex items-center gap-1.5 cursor-pointer"
               >
-                Next Question →
+                <span>Next Question</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </button>
             ) : (
               <button
