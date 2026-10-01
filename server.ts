@@ -12,15 +12,20 @@ if (process.argv.includes('--prod')) {
 }
 
 const requireModule = createRequire(import.meta.url);
-let pdfParseLib: ((buf: Buffer) => Promise<{ text?: string; numpages?: number }>) | null = null;
+let pdfParseClass: (new (opts: { data: Uint8Array }) => {
+  getText: () => Promise<{ text?: string; total?: number }>;
+  destroy?: () => Promise<void>;
+}) | null = null;
+let pdfParseLegacyFn: ((buf: Buffer) => Promise<{ text?: string; numpages?: number }>) | null = null;
 try {
-  pdfParseLib = requireModule('pdf-parse/lib/pdf-parse.js');
-} catch {
-  try {
-    pdfParseLib = requireModule('pdf-parse');
-  } catch {
-    pdfParseLib = null;
+  const pdfMod = requireModule('pdf-parse');
+  if (pdfMod && typeof pdfMod.PDFParse === 'function') {
+    pdfParseClass = pdfMod.PDFParse;
+  } else if (typeof pdfMod === 'function') {
+    pdfParseLegacyFn = pdfMod;
   }
+} catch {
+  pdfParseClass = null;
 }
 
 let mammothLib: { extractRawText: (opts: { buffer: Buffer }) => Promise<{ value: string }> } | null = null;
@@ -155,6 +160,8 @@ function sanitizeExtractedText(raw: string): string {
     .map((line) => line.replace(/[ \t]+/g, ' ').trim())
     .filter((line) => {
       if (line.length < 2) return false;
+      if (/^--\s*\d+\s+of\s+\d+\s*--$/i.test(line)) return false;
+      if (/^page\s+\d+(\s+of\s+\d+)?$/i.test(line)) return false;
       if (isCorruptedOrEncryptedText(line)) return false;
       // Keep any line that has at least one 2+ letter word (preserves resume headers, project titles, tech stacks, dates)
       return /[A-Za-z]{2,}/.test(line);
@@ -502,15 +509,39 @@ async function extractTextFromUploadedFile(
       }
     }
 
-    // 3. PDF Document: Engine A (pdf-parse) + Engine B (ASCII85Decode + FlateDecode + Content Stream Parser)
+    // 3. PDF Document: Engine A (pdf-parse v2 PDFParse class / v1 fn) + Engine B (ASCII85Decode + FlateDecode + Content Stream Parser)
     if (mime.includes('pdf') || lowerName.endsWith('.pdf') || buf.subarray(0, 5).toString() === '%PDF-') {
-      // Engine A: pdf-parse (Mozilla pdf.js engine)
-      if (pdfParseLib) {
+      // Engine A1: pdf-parse v2 PDFParse class (Mozilla pdfjs-dist engine)
+      if (pdfParseClass) {
+        let parserInstance: {
+          getText: () => Promise<{ text?: string; total?: number }>;
+          destroy?: () => Promise<void>;
+        } | null = null;
         try {
-          const parsedPdf = await pdfParseLib(buf);
+          parserInstance = new pdfParseClass({ data: new Uint8Array(buf) });
+          const parsedPdf = await parserInstance.getText();
           if (parsedPdf && parsedPdf.text) {
             const cleanText = sanitizeExtractedText(parsedPdf.text);
-            if (cleanText.length > 40 && !isCorruptedOrEncryptedText(cleanText)) {
+            if (cleanText.length > 20 && !isCorruptedOrEncryptedText(cleanText)) {
+              return cleanText.slice(0, 35000);
+            }
+          }
+        } catch {
+          // Fall through to legacy function or Engine B
+        } finally {
+          if (parserInstance && typeof parserInstance.destroy === 'function') {
+            await parserInstance.destroy().catch(() => {});
+          }
+        }
+      }
+
+      // Engine A2: pdf-parse legacy function
+      if (pdfParseLegacyFn) {
+        try {
+          const parsedPdf = await pdfParseLegacyFn(buf);
+          if (parsedPdf && parsedPdf.text) {
+            const cleanText = sanitizeExtractedText(parsedPdf.text);
+            if (cleanText.length > 20 && !isCorruptedOrEncryptedText(cleanText)) {
               return cleanText.slice(0, 35000);
             }
           }
@@ -1492,11 +1523,11 @@ async function startServer() {
   // KNOWLEDGE & STUDY MATERIALS ENDPOINTS
   // ==========================================
 
-  // Helper: Extract clean key concept tags from text or title
+  // Helper: Extract clean key concept tags from text or title (solely from document, never from subject)
   function extractKeyConceptsFromText(
     rawText: string,
     fallbackTitle: string,
-    fallbackSubject: string
+    _fallbackSubject?: string
   ): string[] {
     const cleanTitleWords = (fallbackTitle || '')
       .replace(/\.[^/.]+$/, '')
@@ -1520,10 +1551,10 @@ async function startServer() {
     }
     while (baseConcepts.length < 4) {
       const defaults = [
-        `${fallbackSubject || 'Core'} Principles`,
+        `${cleanTitleWords[0] || 'Document'} Overview`,
         'Key Definitions',
-        'System Workflow',
-        'Exam Revision Points',
+        'Core Takeaways',
+        'Review Points',
       ];
       const next = defaults[baseConcepts.length];
       if (!baseConcepts.includes(next)) baseConcepts.push(next);
@@ -1539,12 +1570,12 @@ async function startServer() {
   }): Promise<string | null> {
     const clients = getAiClients();
     if (clients.length === 0) return null;
-    const models = ['gemini-2.5-flash', 'gemini-3-flash-preview'];
+    const models = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-3-flash-preview'];
     for (const ai of clients) {
       for (const modelName of models) {
         try {
           const timeoutPromise = new Promise<null>((resolve) =>
-            setTimeout(() => resolve(null), 11000)
+            setTimeout(() => resolve(null), 12000)
           );
           const callPromise = ai.models
             .generateContent({
@@ -1646,17 +1677,18 @@ async function startServer() {
         return 'summary';
       }
 
-      // General academic or document heading detection (ALL CAPS or Title Case short heading without trailing period)
+      // General academic or document heading detection (ALL CAPS, Numbered, or Short Title Case heading without trailing period)
       const isAllCaps =
         clean.length >= 4 &&
-        clean.length <= 42 &&
+        clean.length <= 48 &&
         clean === clean.toUpperCase() &&
         /[A-Z]{3,}/.test(clean);
       const isNumberedHeading =
-        /^(unit|module|chapter|section|part|lecture|topic)\s+\d+/i.test(clean) ||
-        /^\d+(\.\d+)?\s+[A-Z][a-zA-Z\s]{3,35}$/.test(line);
-      if ((isAllCaps || isNumberedHeading) && !line.endsWith('.')) {
-        if (lower.includes('project')) return 'projects';
+        /^(unit|module|chapter|section|part|lecture|topic|stage|phase|step)\s+\d+/i.test(clean) ||
+        /^(\d+(\.\d+)?|[IVX]+\.)\s+[A-Z][a-zA-Z0-9\s,&\-–—/()]{3,48}$/.test(line.trim());
+      const isMarkdownHeading = /^#{1,4}\s+.+/.test(line.trim());
+      if ((isAllCaps || isNumberedHeading || isMarkdownHeading) && !line.trim().endsWith('.')) {
+        if (/^projects?$/i.test(clean)) return 'projects';
         if (lower.includes('skill') || lower.includes('technolog')) return 'skills';
         if (lower.includes('experience') || lower.includes('intern')) return 'experience';
         if (lower.includes('education') || lower.includes('university') || lower.includes('college'))
@@ -1767,36 +1799,13 @@ async function startServer() {
       }
     }
 
-    // Heuristic fallback if no explicit "Projects" heading was matched, look for lines mentioning projects or "Project:"
-    if (projectItems.length === 0 && rawLines.length > 0) {
-      for (let i = 0; i < rawLines.length; i++) {
-        const line = rawLines[i].replace(/^[•●▪◦\-*]+\s*/, '').trim();
-        if (
-          /\b(project|app|application|system|platform|website|portal|dashboard|bot|clone|detector|predictor|analyzer|management system|e-commerce)\b/i.test(
-            line
-          ) &&
-          line.length >= 8 &&
-          line.length <= 110 &&
-          !/^(uploaded|select|click|summary|resume|curriculum)/i.test(line)
-        ) {
-          const nextLine = rawLines[i + 1]
-            ? rawLines[i + 1].replace(/^[•●▪◦\-*]+\s*/, '').trim()
-            : '';
-          projectItems.push({
-            title: line,
-            details: nextLine && nextLine !== line ? [nextLine] : [],
-          });
-          if (projectItems.length >= 6) break;
-        }
-      }
-    }
-
     const cleanSentences = normalized
       .split(/(?<=[.!?])\s+|\n+/)
       .map((s) => s.replace(/^[•●▪◦\-*0-9.)\s]+/, '').trim())
       .filter(
         (s) =>
           s.length >= 12 &&
+          !/^--\s*\d+\s+of\s+\d+\s*--$/i.test(s) &&
           !isCorruptedOrEncryptedText(s) &&
           !s.startsWith('Uploaded study document') &&
           !s.startsWith('Study material uploaded for') &&
@@ -1804,9 +1813,10 @@ async function startServer() {
       );
 
     const isResumeOrPortfolio =
-      /resume|cv|curriculum vitae|portfolio|biodata/i.test(`${title} ${fileName}`) ||
+      /\b(resume|cv|curriculum\s+vitae|biodata|portfolio)\b/i.test(`${title} ${fileName}`) ||
       (sectionsByCategory.projects.length > 0 &&
-        (sectionsByCategory.skills.length > 0 || sectionsByCategory.education.length > 0));
+        sectionsByCategory.skills.length > 0 &&
+        (sectionsByCategory.education.length > 0 || sectionsByCategory.experience.length > 0));
 
     return {
       isResumeOrPortfolio,
