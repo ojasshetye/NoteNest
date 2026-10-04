@@ -795,6 +795,7 @@ export interface UserRecord {
 
 interface DatabaseSchema {
   users: UserRecord[];
+  waitlist?: Array<{ email: string; createdAt: string }>;
 }
 
 function getInitialMaterials(): StudyMaterial[] {
@@ -1517,6 +1518,32 @@ async function startServer() {
 
   app.post('/api/auth/logout', (_req: Request, res: Response) => {
     res.json({ message: 'Signed out successfully.' });
+  });
+
+  // Waitlist lead capture endpoint for Section 9 Landing Page
+  app.post('/api/waitlist', (req: Request, res: Response) => {
+    try {
+      const { email } = req.body;
+      if (!email || typeof email !== 'string' || !validateEmail(email)) {
+        res.status(400).json({ error: 'Please enter a valid email address.' });
+        return;
+      }
+      const db = loadDatabase();
+      const waitlist = db.waitlist || [];
+      const normalizedEmail = email.trim().toLowerCase();
+      if (!waitlist.some((item) => item.email.toLowerCase() === normalizedEmail)) {
+        waitlist.push({ email: normalizedEmail, createdAt: new Date().toISOString() });
+        db.waitlist = waitlist;
+        saveDatabase(db);
+      }
+      res.json({
+        success: true,
+        message: "You're on the NoteNest waitlist! We'll notify you as new features launch.",
+      });
+    } catch (err) {
+      console.error('Waitlist submission error:', err);
+      res.status(500).json({ error: 'Unable to process waitlist entry at this time.' });
+    }
   });
 
   // ==========================================

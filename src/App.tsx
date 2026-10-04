@@ -77,7 +77,13 @@ export default function App() {
   );
   const [appMode, setAppMode] = useState<
     'workspace' | 'landing' | 'signin' | 'signup' | 'onboarding'
-  >(() => (localStorage.getItem(SESSION_STORAGE_KEY) ? 'workspace' : 'signin'));
+  >(() => {
+    const hash = typeof window !== 'undefined' ? window.location.hash.toLowerCase() : '';
+    if (hash === '#signin' || hash === '#login') return 'signin';
+    if (hash === '#signup' || hash === '#register') return 'signup';
+    if (hash === '#landing' || hash === '#home') return 'landing';
+    return localStorage.getItem(SESSION_STORAGE_KEY) ? 'workspace' : 'landing';
+  });
 
   const [activeNav, setActiveNav] = useState<NavSection>('dashboard');
   const [knowledgeSubView, setKnowledgeSubView] = useState<string | undefined>(undefined);
@@ -261,13 +267,40 @@ export default function App() {
     setAppMode('signin');
   };
 
+  const handleDemoAccountLogin = async (targetNav?: NavSection) => {
+    try {
+      const res = await fetch('/api/auth/signin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: 'alex.chen@stanford.edu',
+          password: 'Password123!',
+          rememberMe: true,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.token && data.user) {
+        handleAuthSuccess(data.token, data.user, false);
+        if (targetNav) setActiveNav(targetNav);
+        return;
+      }
+    } catch {
+      // fallback
+    }
+    setAppMode('signin');
+  };
+
   // Render Landing Page
   if (appMode === 'landing') {
     return (
       <LandingPage
         onNavigateSignIn={() => setAppMode('signin')}
         onNavigateSignUp={() => setAppMode('signup')}
-        onQuickDemoLogin={() => setAppMode('signin')}
+        onQuickDemoLogin={() => handleDemoAccountLogin('dashboard')}
+        onNavigateAiAssistant={() => handleDemoAccountLogin('ai-assistant')}
+        onNavigateKnowledge={() => handleDemoAccountLogin('knowledge')}
+        onNavigateQuizzes={() => handleDemoAccountLogin('quizzes')}
+        onNavigateDashboard={() => handleDemoAccountLogin('dashboard')}
       />
     );
   }
@@ -397,6 +430,15 @@ export default function App() {
         {/* Bottom Support, Profile & Logout */}
         <div className="space-y-3 pt-4 border-t border-[#E2E8F0]">
           <div className="space-y-1">
+            <button
+              type="button"
+              onClick={() => setAppMode('landing')}
+              className="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-medium text-[#434655] hover:bg-[#F8FAFC] hover:text-[#0F172A] cursor-pointer"
+            >
+              <Sparkles className="w-4 h-4 text-[#2563EB]" />
+              <span>Landing Page (Section 9)</span>
+            </button>
+
             <button
               type="button"
               onClick={() => setHelpOpen(true)}
@@ -850,6 +892,17 @@ export default function App() {
                 >
                   <Settings className="w-4 h-4 shrink-0" />
                   <span>My Profile &amp; Subjects</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setAppMode('landing');
+                  }}
+                  className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-[#434655] hover:bg-[#F8FAFC] cursor-pointer"
+                >
+                  <Sparkles className="w-4 h-4 shrink-0 text-[#2563EB]" />
+                  <span>Landing Page (Section 9)</span>
                 </button>
                 <button
                   type="button"
